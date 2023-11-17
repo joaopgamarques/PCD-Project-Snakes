@@ -51,8 +51,7 @@ public class AutomaticSnake extends Snake {
 				// Determine the next position for the snake to move to.
 				BoardPosition nextPosition;
 				if (isInterruptedByUser) {
-					BoardPosition nextPositionTowardsGoal = getNextPositionTowardsGoal();
-					nextPosition = getBoard().getCell(nextPositionTowardsGoal).isOccupied() ? getRandomPosition() : nextPositionTowardsGoal;
+					nextPosition = getRandomPosition();
 					isInterruptedByUser = false;
 				} else {
 					nextPosition = getNextPositionTowardsGoal();
