@@ -48,7 +48,7 @@ public class ObstacleMover extends Thread {
 				board.setChanged();
 
 			} catch (InterruptedException e) {
-				System.out.println("Obstacle " + Thread.currentThread().getName() + ": Interrupted.");
+				System.out.println(Thread.currentThread().getName() + ": Interrupted.");
 				Thread.currentThread().interrupt(); // Preserve the interrupt status.
 				break; // Exit the loop if the game is finished or the thread is interrupted.
 			}
