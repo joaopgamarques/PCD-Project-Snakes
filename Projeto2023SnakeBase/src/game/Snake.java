@@ -52,13 +52,13 @@ public abstract class Snake extends Thread implements Serializable{
 		// TODO
 		// Request access to the cell for the snake.
 		cell.request(this);
+		// Add the cell to the snake's path.
+		getCells().addLast(cell);
 		// Check if the cell contains a goal.
 		if (cell.isOcupiedByGoal()) {
 			// Handle the goal capturing process.
 			captureGoalHandler(cell);
 		}
-		// Add the cell to the snake's path.
-		getCells().addLast(cell);
 		// Release the tail cell if the snake has not grown.
 		if (getLength() > size && growthPending == 0) {
 			BoardPosition tail = cells.removeFirst().getPosition();
