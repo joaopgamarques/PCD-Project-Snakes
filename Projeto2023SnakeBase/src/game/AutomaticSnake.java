@@ -53,17 +53,23 @@ public class AutomaticSnake extends Snake {
 				if (isInterruptedByUser) {
 					nextPosition = getRandomPosition();
 					isInterruptedByUser = false;
+					// System.out.println("Goal position: " + getBoard().getGoalPosition());
 				} else {
 					nextPosition = getNextPositionTowardsGoal();
 				}
-				move(getBoard().getCell(nextPosition));
+				Cell nextCell = getBoard().getCell(nextPosition);
+
+				// Execute the move operation for the snake.
+				move(nextCell);
 
 			} catch (InterruptedException e) {
 				if (!getBoard().isFinished() && !isTrapped()) {
 					System.out.println(Thread.currentThread().getName() + ": Interrupted. Choosing a direction.");
 					isInterruptedByUser = true;
 				} else {
-					System.out.println(Thread.currentThread().getName() + ": Interrupted.");
+					String message = getBoard().isFinished() ? "Game already finished." :
+							Thread.currentThread().getName() + " is trapped and cannot move.";
+					System.out.println(Thread.currentThread().getName() + ": Interrupted. " + message);
 					Thread.currentThread().interrupt(); // Preserve the interrupt status.
 					break; // Exit the loop if the game is finished or the thread is interrupted.
 				}

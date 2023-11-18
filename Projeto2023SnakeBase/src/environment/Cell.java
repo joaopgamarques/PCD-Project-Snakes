@@ -34,6 +34,10 @@ public class Cell {
 		return position;
 	}
 
+	public Lock getLock() {
+		return lock;
+	}
+
 	// Requests access to this cell for a snake, blocking until it is not occupied.
 	public void request(Snake snake) throws InterruptedException {
 		// TODO coordination and mutual exclusion.
