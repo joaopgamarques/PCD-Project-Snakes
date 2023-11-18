@@ -53,7 +53,6 @@ public class AutomaticSnake extends Snake {
 				if (isInterruptedByUser) {
 					nextPosition = getRandomPosition();
 					isInterruptedByUser = false;
-					// System.out.println("Goal position: " + getBoard().getGoalPosition());
 				} else {
 					nextPosition = getNextPositionTowardsGoal();
 				}
