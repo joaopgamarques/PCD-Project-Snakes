@@ -77,7 +77,7 @@ public class Cell {
 				notOccupied.await();
 			}
 			gameElement = element;
-			gameElement.setCurrentPosition(getPosition());
+			gameElement.setCurrentPosition(position);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			System.out.println("Thread was interrupted while setting a game element.");
