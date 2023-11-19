@@ -12,8 +12,8 @@ public abstract class Board extends Observable {
 	public static final int NUM_COLUMNS = 30;
 	public static final int NUM_ROWS = 30;
 	protected LinkedList<Snake> snakes = new LinkedList<Snake>();
-	private LinkedList<Obstacle> obstacles = new LinkedList<Obstacle>();
-	private LinkedList<ObstacleMover> obstacleMovers = new LinkedList<ObstacleMover>();
+	private final LinkedList<Obstacle> obstacles = new LinkedList<Obstacle>();
+	private final LinkedList<ObstacleMover> obstacleMovers = new LinkedList<ObstacleMover>();
 	protected volatile boolean isFinished;
 
 	public Board() {
