@@ -79,13 +79,11 @@ public class ObstacleMover extends Thread {
 				// Acquire lock on the destination cell.
 				nextCell.getLock().lock();
 				try {
-					// Check if the destination cell is not occupied.
-					if (!nextCell.isOccupied()) {
-						// Remove obstacle from the current cell.
-						currentCell.removeObstacle();
-						// Place the obstacle in the destination cell.
-						nextCell.setGameElement(obstacle);
-					}
+					// Remove obstacle from the current cell.
+					currentCell.removeObstacle();
+					// Place the obstacle in the destination cell.
+					nextCell.setGameElement(obstacle);
+
 				} finally {
 					// Ensure the lock on the destination cell is released.
 					nextCell.getLock().unlock();
