@@ -83,7 +83,6 @@ public class ObstacleMover extends Thread {
 					currentCell.removeObstacle();
 					// Place the obstacle in the destination cell.
 					nextCell.setGameElement(obstacle);
-
 				} finally {
 					// Ensure the lock on the destination cell is released.
 					nextCell.getLock().unlock();
