@@ -4,10 +4,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import game.GameElement;
-import game.Goal;
-import game.Obstacle;
-import game.Snake;
+import game.*;
 
 /** Main class for game representation.
  * 
@@ -131,5 +128,66 @@ public class Cell {
 
 	public boolean isOcupiedByGoal() {
 		return (gameElement != null && gameElement instanceof Goal);
+	}
+
+	// Moves an obstacle from one cell to another in a thread-safe manner.
+	public static void obstacleMoverHandler(Obstacle obstacle, Cell currentCell, Cell nextCell) {
+		// Lock objects for both the current and destination cells.
+		try {
+			// Acquire lock on the current cell.
+			currentCell.getLock().lock();
+			try {
+				// Acquire lock on the destination cell.
+				nextCell.getLock().lock();
+				try {
+					// Remove obstacle from the current cell.
+					currentCell.removeObstacle();
+					// Place the obstacle in the destination cell.
+					nextCell.setGameElement(obstacle);
+				} finally {
+					// Ensure the lock on the destination cell is released.
+					nextCell.getLock().unlock();
+				}
+			} finally {
+				// Ensure the lock on the current cell is released.
+				currentCell.getLock().unlock();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in ObstacleMover move method: " + e.getMessage());
+		}
+	}
+
+	// Moves the goal from one cell to another in a thread-safe manner.
+	public static void captureGoalHandler(Snake snake, Cell currentCell, Cell nextCell, Board board) {
+		// Lock objects for both the current and destination cells.
+		try {
+			// Acquire lock on the current cell.
+			currentCell.getLock().lock();
+			try {
+				// Acquire lock on the destination cell.
+				nextCell.getLock().lock();
+				try {
+					// Remove the goal from the current cell.
+					Goal goal = currentCell.removeGoal();
+					// Increment the growth pending for the snake as it captures the goal.
+					snake.increaseGrowthPending(goal.captureGoal());
+					// Increment the goal's value and check for game termination.
+					goal.incrementValue();
+					if (goal.getValue() == Goal.MAX_VALUE) {
+						((LocalBoard)board).endGame();
+						return;
+					}
+					// Set the goal in its new position and update the board's goal position.
+					nextCell.setGameElement(goal);
+					board.setGoalPosition(nextCell.getPosition());
+				} finally {
+					nextCell.getLock().unlock();
+				}
+			} finally {
+				currentCell.getLock().unlock();
+			}
+		} catch (Exception e) {
+			System.out.println("Exception in captureGoalHandler: " + e.getMessage());
+		}
 	}
 }

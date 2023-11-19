@@ -61,7 +61,8 @@ public class ObstacleMover extends Thread {
 		Cell currentCell = board.getCell(currentPosition);
 		Cell nextCell = board.getCell(nextPosition);
 		// Call the method to handle the actual movement of the obstacle from the current cell to the next cell.
-		obstacleMoverHandler(currentCell, nextCell);
+		// obstacleMoverHandler(currentCell, nextCell);
+		Cell.obstacleMoverHandler(obstacle, currentCell, nextCell);
 		// Once the obstacle has been moved, decrement its remaining moves count.
 		obstacle.decrementRemainingMoves();
 		// Notify the board that a change has occurred. This could be used to update the game state,
@@ -69,6 +70,7 @@ public class ObstacleMover extends Thread {
 		board.setChanged();
 	}
 
+	/*
 	// Moves an obstacle from one cell to another in a thread-safe manner.
 	private void obstacleMoverHandler(Cell currentCell, Cell nextCell) {
 		// Lock objects for both the current and destination cells.
@@ -95,4 +97,5 @@ public class ObstacleMover extends Thread {
 			System.out.println("Exception in ObstacleMover move method: " + e.getMessage());
 		}
 	}
+	 */
 }

@@ -47,6 +47,11 @@ public abstract class Snake extends Thread implements Serializable{
 		return cells;
 	}
 
+	// Increases the growth pending for the snake.
+	public void increaseGrowthPending(int additionalGrowth) {
+		growthPending += additionalGrowth;
+	}
+
 	// Moves the snake to a new cell and handles any interaction with goals.
 	protected void move(Cell cell) throws InterruptedException {
 		// TODO
@@ -56,8 +61,16 @@ public abstract class Snake extends Thread implements Serializable{
 		getCells().addLast(cell);
 		// Check if the cell contains a goal.
 		if (cell.isOcupiedByGoal()) {
+			// Retrieve the current position of the goal.
+			BoardPosition currentPosition = cell.getPosition();
+			// Determine a new unoccupied position for the goal.
+			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			// Obtain the cell objects for both the current and next positions.
+			Cell currentCell = board.getCell(currentPosition);
+			Cell nextCell = board.getCell(nextPosition);
 			// Handle the goal capturing process.
-			captureGoalHandler(cell);
+			// captureGoalHandler(currentCell, nextCell);
+			Cell.captureGoalHandler(this, currentCell, nextCell, board);
 		}
 		// Release the tail cell if the snake has not grown.
 		if (getLength() > size && growthPending == 0) {
@@ -72,11 +85,9 @@ public abstract class Snake extends Thread implements Serializable{
 		board.setChanged();
 	}
 
-	private void captureGoalHandler(Cell currentCell) {
-		// Determine a new unoccupied position for the goal.
-		BoardPosition nextPosition = board.getUnoccupiedPosition(currentCell.getPosition());
-		Cell nextCell = board.getCell(nextPosition);
-
+	/*
+	// Moves the goal from one cell to another in a thread-safe manner.
+	private void captureGoalHandler(Cell currentCell, Cell nextCell) {
 		// Lock objects for both the current and destination cells.
 		try {
 			// Acquire lock on the current cell.
@@ -88,7 +99,7 @@ public abstract class Snake extends Thread implements Serializable{
 					// Remove the goal from the current cell.
 					Goal goal = currentCell.removeGoal();
 					// Increment the growth pending for the snake as it captures the goal.
-					growthPending += goal.captureGoal();
+					increaseGrowthPending(goal.captureGoal());
 					// Increment the goal's value and check for game termination.
 					goal.incrementValue();
 					if (goal.getValue() == Goal.MAX_VALUE) {
@@ -97,7 +108,7 @@ public abstract class Snake extends Thread implements Serializable{
 					}
 					// Set the goal in its new position and update the board's goal position.
 					nextCell.setGameElement(goal);
-					board.setGoalPosition(nextPosition);
+					board.setGoalPosition(nextCell.getPosition());
 				} finally {
 					nextCell.getLock().unlock();
 				}
@@ -108,6 +119,7 @@ public abstract class Snake extends Thread implements Serializable{
 			System.out.println("Exception in captureGoalHandler: " + e.getMessage());
 		}
 	}
+	 */
 
 	// Returns a list of positions representing the snake's body.
 	public LinkedList<BoardPosition> getPath() {
