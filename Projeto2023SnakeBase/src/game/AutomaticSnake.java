@@ -1,5 +1,6 @@
 package game;
 
+import java.awt.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -98,12 +99,6 @@ public class AutomaticSnake extends Snake {
 		return nextPosition;
 	}
 
-	// Checks if the given position is currently occupied by a segment of the snake.
-	private boolean isPositionOccupiedBySnake(BoardPosition position) {
-		LinkedList<BoardPosition> path = getPath();
-		return path.contains(position);
-	}
-
 	// Gets a random unoccupied neighboring position.
 	private BoardPosition getRandomPosition() {
 		Cell head = cells.getLast();
@@ -127,5 +122,11 @@ public class AutomaticSnake extends Snake {
 			}
 		}
 		return true;
+	}
+
+	// Checks if the given position is currently occupied by a segment of the snake.
+	private boolean isPositionOccupiedBySnake(BoardPosition position) {
+		LinkedList<BoardPosition> path = getPath();
+		return path.contains(position);
 	}
 }
