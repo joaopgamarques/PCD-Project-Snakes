@@ -17,6 +17,8 @@ public class Cell {
 	private GameElement gameElement = null;
 	private final Lock lock = new ReentrantLock();
 	private final Condition notOccupied = lock.newCondition();
+	private static Lock obstacleMoverLock = new ReentrantLock();
+	private static Lock captureGoalLock = new ReentrantLock();
 
 	public GameElement getGameElement() {
 		return gameElement;
@@ -131,6 +133,33 @@ public class Cell {
 	}
 
 	// Moves an obstacle from one cell to another in a thread-safe manner.
+	public void obstacleMoverHandler(Obstacle obstacle) {
+		// Lock to ensure exclusive access for moving the obstacle.
+		obstacleMoverLock.lock();
+		try {
+			// Get the board context for the obstacle.
+			Board board = obstacle.getBoard();
+			// Retrieve the current position of the obstacle.
+			BoardPosition currentPosition = obstacle.getCurrentPosition();
+			// Find a new position for the obstacle that is currently unoccupied.
+			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			// Obtain the cell objects for both the current and next positions.
+			Cell currentCell = board.getCell(currentPosition);
+			Cell nextCell = board.getCell(nextPosition);
+			// Remove obstacle from the current cell.
+			currentCell.removeObstacle();
+			// Place the obstacle in the destination cell.
+			nextCell.setGameElement(obstacle);
+		} catch (Exception e) {
+			System.out.println("Exception in ObstacleMover move method: " + e.getMessage());
+		} finally {
+			// Ensure that the lock is always released after the operation.
+			obstacleMoverLock.unlock();
+		}
+	}
+
+	/*
+	// Moves an obstacle from one cell to another in a thread-safe manner.
 	public static void obstacleMoverHandler(Obstacle obstacle, Cell currentCell, Cell nextCell) {
 		// Lock objects for both the current and destination cells.
 		try {
@@ -156,9 +185,46 @@ public class Cell {
 			System.out.println("Exception in ObstacleMover move method: " + e.getMessage());
 		}
 	}
+	 */
 
 	// Moves the goal from one cell to another in a thread-safe manner.
-	public static void captureGoalHandler(Snake snake, Cell currentCell, Cell nextCell, Board board) {
+	public void captureGoalHandler(Snake snake) {
+		// Lock to ensure exclusive access for moving the goal.
+		captureGoalLock.lock();
+		try{
+			// Get the board context for the obstacle.
+			Board board = snake.getBoard();
+			// Retrieve the current position of the goal.
+			BoardPosition currentPosition = getPosition();
+			// Determine a new unoccupied position for the goal.
+			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			// Obtain the cell objects for both the current and next positions.
+			Cell currentCell = board.getCell(currentPosition);
+			Cell nextCell = board.getCell(nextPosition);
+			// Remove the goal from the current cell.
+			Goal goal = currentCell.removeGoal();
+			// Increment the growth pending for the snake as it captures the goal.
+			snake.increaseGrowthPending(goal.captureGoal());
+			// Increment the goal's value and check for game termination.
+			goal.incrementValue();
+			if (goal.getValue() == Goal.MAX_VALUE) {
+				((LocalBoard)board).endGame();
+				return;
+			}
+			// Set the goal in its new position and update the board's goal position.
+			nextCell.setGameElement(goal);
+			board.setGoalPosition(nextCell.getPosition());
+		} catch (InterruptedException e) {
+			System.out.println("Exception in captureGoalHandler: " + e.getMessage());
+		} finally {
+			// Ensure that the lock is always released after the operation.
+			captureGoalLock.unlock();
+		}
+	}
+
+	/*
+	// Moves the goal from one cell to another in a thread-safe manner.
+	public static void captureGoalHandler(Snake snake, Cell currentCell, Cell nextCell) {
 		// Lock objects for both the current and destination cells.
 		try {
 			// Acquire lock on the current cell.
@@ -167,6 +233,8 @@ public class Cell {
 				// Acquire lock on the destination cell.
 				nextCell.getLock().lock();
 				try {
+					// Get the board context for the obstacle.
+					Board board = snake.getBoard();
 					// Remove the goal from the current cell.
 					Goal goal = currentCell.removeGoal();
 					// Increment the growth pending for the snake as it captures the goal.
@@ -190,4 +258,5 @@ public class Cell {
 			System.out.println("Exception in captureGoalHandler: " + e.getMessage());
 		}
 	}
+	 */
 }

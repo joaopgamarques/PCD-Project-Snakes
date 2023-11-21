@@ -22,6 +22,10 @@ public class Obstacle extends GameElement {
 		return id;
 	}
 
+	public Board getBoard() {
+		return board;
+	}
+
 	@Override
 	public BoardPosition getCurrentPosition() {
 		return currentPosition;
