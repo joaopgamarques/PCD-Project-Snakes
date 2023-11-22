@@ -61,7 +61,6 @@ public abstract class Snake extends Thread implements Serializable{
 		getCells().addLast(cell);
 		// Check if the cell contains a goal.
 		if (cell.isOcupiedByGoal()) {
-			/*
 			// Retrieve the current position of the goal.
 			BoardPosition currentPosition = cell.getPosition();
 			// Determine a new unoccupied position for the goal.
@@ -70,10 +69,8 @@ public abstract class Snake extends Thread implements Serializable{
 			Cell currentCell = board.getCell(currentPosition);
 			Cell nextCell = board.getCell(nextPosition);
 			// Handle the goal capturing process.
-			// captureGoalHandler(currentCell, nextCell);
 			Cell.captureGoalHandler(this, currentCell, nextCell);
-			 */
-			cell.captureGoalHandler(this);
+			// cell.captureGoalHandler(this);
 		}
 		// Release the tail cell if the snake has not grown.
 		if (getLength() > size && growthPending == 0) {
@@ -87,42 +84,6 @@ public abstract class Snake extends Thread implements Serializable{
 		// refresh the UI, or notify other components that are observing the board.
 		board.setChanged();
 	}
-
-	/*
-	// Moves the goal from one cell to another in a thread-safe manner.
-	private void captureGoalHandler(Cell currentCell, Cell nextCell) {
-		// Lock objects for both the current and destination cells.
-		try {
-			// Acquire lock on the current cell.
-			currentCell.getLock().lock();
-			try {
-				// Acquire lock on the destination cell.
-				nextCell.getLock().lock();
-				try {
-					// Remove the goal from the current cell.
-					Goal goal = currentCell.removeGoal();
-					// Increment the growth pending for the snake as it captures the goal.
-					increaseGrowthPending(goal.captureGoal());
-					// Increment the goal's value and check for game termination.
-					goal.incrementValue();
-					if (goal.getValue() == Goal.MAX_VALUE) {
-						((LocalBoard)board).endGame();
-						return;
-					}
-					// Set the goal in its new position and update the board's goal position.
-					nextCell.setGameElement(goal);
-					board.setGoalPosition(nextCell.getPosition());
-				} finally {
-					nextCell.getLock().unlock();
-				}
-			} finally {
-				currentCell.getLock().unlock();
-			}
-		} catch (Exception e) {
-			System.out.println("Exception in captureGoalHandler: " + e.getMessage());
-		}
-	}
-	 */
 
 	// Returns a list of positions representing the snake's body.
 	public LinkedList<BoardPosition> getPath() {

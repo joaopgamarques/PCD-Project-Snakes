@@ -6,7 +6,7 @@ package environment;
  *
  */
 
-public class BoardPosition {
+public class BoardPosition implements Comparable<BoardPosition> {
 	public final int x;
 	public final int y;
 
@@ -25,6 +25,14 @@ public class BoardPosition {
 	public boolean equals(Object obj) {
 		BoardPosition other = (BoardPosition) obj;
 		return other.x == x && other.y == y;
+	}
+
+	@Override
+	public int compareTo(BoardPosition other) {
+		if (this.x == other.x) {
+			return Integer.compare(this.y, other.y);
+		}
+		return Integer.compare(this.x, other.x);
 	}
 	
 	public double distanceTo(BoardPosition other) {
