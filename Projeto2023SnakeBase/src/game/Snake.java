@@ -61,15 +61,8 @@ public abstract class Snake extends Thread implements Serializable{
 		getCells().addLast(cell);
 		// Check if the cell contains a goal.
 		if (cell.isOcupiedByGoal()) {
-			// Retrieve the current position of the goal.
-			BoardPosition currentPosition = cell.getPosition();
-			// Determine a new unoccupied position for the goal.
-			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
-			// Obtain the cell objects for both the current and next positions.
-			Cell currentCell = board.getCell(currentPosition);
-			Cell nextCell = board.getCell(nextPosition);
 			// Handle the goal capturing process.
-			Cell.captureGoalHandler(this, currentCell, nextCell);
+			Cell.captureGoalHandler(this);
 			// cell.captureGoalHandler(this);
 		}
 		// Release the tail cell if the snake has not grown.

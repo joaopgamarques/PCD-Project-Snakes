@@ -133,8 +133,18 @@ public class Cell {
 	}
 
 	// Moves an obstacle from one cell to another in a thread-safe manner.
-	public static void obstacleMoverHandler(Obstacle obstacle, Cell currentCell, Cell nextCell) {
+	public static void obstacleMoverHandler(Obstacle obstacle) {
 		Lock firstLock, secondLock;
+
+		// Get the board context for the obstacle.
+		Board board = obstacle.getBoard();
+		// Retrieve the current position of the obstacle.
+		BoardPosition currentPosition = obstacle.getCurrentPosition();
+		// Find a new position for the obstacle that is currently unoccupied.
+		BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+		// Obtain the cell objects for both the current and next positions.
+		Cell currentCell = board.getCell(currentPosition);
+		Cell nextCell = board.getCell(nextPosition);
 
 		// Determine the order of locks based on the positions of the cells to avoid deadlocks.
 		// Locks are always acquired in a consistent global order.
@@ -172,8 +182,18 @@ public class Cell {
 	}
 
 	// Moves the goal from one cell to another in a thread-safe manner.
-	public static void captureGoalHandler(Snake snake, Cell currentCell, Cell nextCell) {
+	public static void captureGoalHandler(Snake snake) {
 		Lock firstLock, secondLock;
+
+		// Get the board context for the obstacle.
+		Board board = snake.getBoard();
+		// Retrieve the current position of the goal.
+		BoardPosition currentPosition = snake.getCells().getLast().getPosition();
+		// Determine a new unoccupied position for the goal.
+		BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+		// Obtain the cell objects for both the current and next positions.
+		Cell currentCell = board.getCell(currentPosition);
+		Cell nextCell = board.getCell(nextPosition);
 
 		// Determine the order of locks based on the positions of the cells to avoid deadlocks.
 		// Locks are always acquired in a consistent global order.
@@ -191,8 +211,6 @@ public class Cell {
 			// Acquire the second lock.
 			secondLock.lock();
 			try {
-				// Get the board context for the obstacle.
-				Board board = snake.getBoard();
 				// Remove the goal from the current cell.
 				Goal goal = currentCell.removeGoal();
 				// Increment the growth pending for the snake as it captures the goal.

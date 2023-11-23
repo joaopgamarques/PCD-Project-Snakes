@@ -53,15 +53,8 @@ public class ObstacleMover extends Thread {
 
 	// Handles the movement of the obstacle to a new position.
 	private void move() {
-		// Retrieve the current position of the obstacle.
-		BoardPosition currentPosition = obstacle.getCurrentPosition();
-		// Find a new position for the obstacle that is currently unoccupied.
-		BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
-		// Obtain the cell objects for both the current and next positions.
-		Cell currentCell = board.getCell(currentPosition);
-		Cell nextCell = board.getCell(nextPosition);
 		// Call the method to handle the actual movement of the obstacle from the current cell to the next cell.
-		Cell.obstacleMoverHandler(obstacle, currentCell, nextCell);
+		Cell.obstacleMoverHandler(obstacle);
 		// Notify the board that a change has occurred. This could be used to update the game state,
 		// refresh the UI, or notify other components that are observing the board.
 		board.setChanged();
