@@ -183,56 +183,73 @@ public class Cell {
 
 	// Moves the goal from one cell to another in a thread-safe manner.
 	public static void captureGoalHandler(Snake snake) {
-		Lock firstLock, secondLock;
+		// Flag to keep track of whether the goal has been successfully moved.
+		boolean goalMovedSuccessfully = false;
 
-		// Get the board context for the obstacle.
-		Board board = snake.getBoard();
-		// Retrieve the current position of the goal.
-		BoardPosition currentPosition = snake.getCells().getLast().getPosition();
-		// Determine a new unoccupied position for the goal.
-		BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
-		// Obtain the cell objects for both the current and next positions.
-		Cell currentCell = board.getCell(currentPosition);
-		Cell nextCell = board.getCell(nextPosition);
+		// Loop until the goal is moved successfully or the current thread is interrupted.
+		while (!Thread.currentThread().isInterrupted() && !goalMovedSuccessfully) {
+			Lock firstLock, secondLock;
+			boolean isFirstLockCurrentCell;
 
-		// Determine the order of locks based on the positions of the cells to avoid deadlocks.
-		// Locks are always acquired in a consistent global order.
-		if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
-			firstLock = currentCell.getLock();
-			secondLock = nextCell.getLock();
-		} else {
-			firstLock = nextCell.getLock();
-			secondLock = currentCell.getLock();
-		}
+			// Get the board context for the obstacle.
+			Board board = snake.getBoard();
+			// Retrieve the current position of the goal.
+			BoardPosition currentPosition = snake.getCells().getLast().getPosition();
+			// Determine a new unoccupied position for the goal.
+			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			// Obtain the cell objects for both the current and next positions.
+			Cell currentCell = board.getCell(currentPosition);
+			Cell nextCell = board.getCell(nextPosition);
 
-		// Acquire the first lock.
-		firstLock.lock();
-		try {
-			// Acquire the second lock.
-			secondLock.lock();
-			try {
-				// Remove the goal from the current cell.
-				Goal goal = currentCell.removeGoal();
-				// Increment the growth pending for the snake as it captures the goal.
-				snake.increaseGrowthPending(goal.captureGoal());
-				// Increment the goal's value and check for game termination.
-				goal.incrementValue();
-				if (goal.getValue() == Goal.MAX_VALUE) {
-					((LocalBoard)board).endGame();
-					return;
-				}
-				// Set the goal in its new position and update the board's goal position.
-				nextCell.setGameElement(goal);
-				board.setGoalPosition(nextCell.getPosition());
-			} catch (InterruptedException e) {
-				System.out.println("Exception in captureGoalHandler: " + e.getMessage());
-            } finally {
-				// Ensure the second lock is released.
-				secondLock.unlock();
+			// Determine the order of locks based on the positions of the cells to avoid deadlocks.
+			// Locks are always acquired in a consistent global order.
+			if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
+				firstLock = currentCell.getLock();
+				secondLock = nextCell.getLock();
+				isFirstLockCurrentCell = true;
+			} else {
+				firstLock = nextCell.getLock();
+				secondLock = currentCell.getLock();
+				isFirstLockCurrentCell = false;
 			}
-		} finally {
-			// Ensure the first lock is released.
-			firstLock.unlock();
+
+			// Acquire the first lock.
+			firstLock.lock();
+			try {
+				// Acquire the second lock.
+				secondLock.lock();
+				try {
+					// Remove the goal from the current cell.
+					Goal goal = currentCell.removeGoal();
+					// Increment the growth pending for the snake as it captures the goal.
+					snake.increaseGrowthPending(goal.captureGoal());
+					// Increment the goal's value and check for game termination.
+					goal.incrementValue();
+					if (goal.getValue() == Goal.MAX_VALUE) {
+						((LocalBoard) board).endGame();
+						return;
+					}
+					// Set the goal in its new position and update the board's goal position.
+					nextCell.setGameElement(goal);
+					board.setGoalPosition(nextCell.getPosition());
+					goalMovedSuccessfully = true;
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					break;
+				} finally {
+					// Ensure the second lock is released.
+					// Release the second lock only if it's not for the current cell or if the goal has moved successfully.
+					if (goalMovedSuccessfully || !isFirstLockCurrentCell) {
+						secondLock.unlock();
+					}
+				}
+			} finally {
+				// Ensure the first lock is released.
+				// Release the first lock only if it's for the next cell or if the goal has moved successfully.
+				if (goalMovedSuccessfully || isFirstLockCurrentCell) {
+					firstLock.unlock();
+				}
+			}
 		}
 	}
 
