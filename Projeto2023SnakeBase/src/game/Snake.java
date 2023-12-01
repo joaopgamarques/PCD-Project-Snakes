@@ -59,12 +59,15 @@ public abstract class Snake extends Thread implements Serializable{
 		cell.request(this);
 		// Add the cell to the snake's path.
 		getCells().addLast(cell);
+
 		// Check if the cell contains a goal.
 		if (cell.isOcupiedByGoal()) {
-			// Handle the goal capturing process.
-			Cell.captureGoalHandler(this);
-			// cell.captureGoalHandler(this);
+			// Increment the growth pending for the snake as it captures the goal.
+			Goal goal = (Goal)cell.getGameElement();
+			increaseGrowthPending(goal.captureGoal());
+			Cell.goalCaptureAndMoveHandler(board);
 		}
+
 		// Release the tail cell if the snake has not grown.
 		if (getLength() > size && growthPending == 0) {
 			BoardPosition tail = cells.removeFirst().getPosition();
@@ -73,6 +76,7 @@ public abstract class Snake extends Thread implements Serializable{
 			// If growth is pending, decrement it.
 			growthPending--;
 		}
+
 		// Notify the board that a change has occurred. This could be used to update the game state,
 		// refresh the UI, or notify other components that are observing the board.
 		board.setChanged();

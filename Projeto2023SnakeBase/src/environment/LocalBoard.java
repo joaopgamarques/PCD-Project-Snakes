@@ -50,7 +50,6 @@ public class LocalBoard extends Board {
 	// Marks the game as finished, triggering a graceful shutdown process. This method should be called when the game is to be concluded.
 	// All active game entities should periodically check the 'isFinished' flag and terminate their operations if it is set to true.
 	public void endGame() {
-		setChanged();
 		isFinished = true; // Signal all game entities that the game has ended.
 		snakes.forEach(snake -> snake.interrupt()); // Stop all snakes.
 		shutdownNow(); // Stop all obstacle movers.

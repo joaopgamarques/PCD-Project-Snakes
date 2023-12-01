@@ -1,6 +1,5 @@
 package game;
 
-import environment.BoardPosition;
 import environment.Cell;
 import environment.LocalBoard;
 
@@ -54,22 +53,9 @@ public class ObstacleMover extends Thread {
 	// Handles the movement of the obstacle to a new position.
 	private void move() {
 		// Call the method to handle the actual movement of the obstacle from the current cell to the next cell.
-		Cell.obstacleMoverHandler(obstacle);
+		Cell.obstacleMoveHandler(obstacle);
 		// Notify the board that a change has occurred. This could be used to update the game state,
 		// refresh the UI, or notify other components that are observing the board.
 		board.setChanged();
 	}
-
-	/*
-	// Handles the movement of the obstacle to a new position.
-	private void move() {
-		// Retrieve the current position of the obstacle.
-		BoardPosition currentPosition = obstacle.getCurrentPosition();
-		// Call the obstacleMoverHandler from the Cell class to safely move the obstacle.
-		obstacle.getBoard().getCell(currentPosition).obstacleMoverHandler(obstacle);
-		// Notify the board that a change has occurred. This could be used to update the game state,
-		// refresh the UI, or notify other components that are observing the board.
-		board.setChanged();
-	}
-	 */
 }
