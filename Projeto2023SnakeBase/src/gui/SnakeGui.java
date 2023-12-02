@@ -32,8 +32,8 @@ public class SnakeGui implements Observer {
 
 	public SnakeGui(Board board, int x, int y) {
 		super();
-		this.board=board;
-		frame= new JFrame("The Snake Game: "+ (board instanceof LocalBoard? "Local":"Remote"));
+		this.board = board;
+		frame = new JFrame("The Snake Game: "+ (board instanceof LocalBoard? "Local":"Remote"));
 		frame.setLocation(x, y);
 		buildGui();
 	}

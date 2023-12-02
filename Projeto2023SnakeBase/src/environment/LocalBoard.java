@@ -1,10 +1,5 @@
 package environment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +16,7 @@ public class LocalBoard extends Board {
 	private static final int NUM_OBSTACLES = 25;
 	private static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3;
 	private final ExecutorService obstacleMoverThreadPool; // ExecutorService to manage ObstacleMover threads.
+	private GameState gameState;
 
 	public LocalBoard() {
 		// Initialize the thread pool with the fixed number of threads for moving obstacles.
@@ -37,6 +33,7 @@ public class LocalBoard extends Board {
 
 	// Initializes the game by starting all snake threads and scheduling obstacle movers.
 	public void init() {
+		gameState = new GameState(cells, snakes);
 		for(Snake snake: snakes) {
 			snake.start();
 		}
@@ -45,6 +42,12 @@ public class LocalBoard extends Board {
 			ObstacleMover obstacleMover = new ObstacleMover(obstacle, this);
 			obstacleMoverThreadPool.submit(obstacleMover); // Executes using the thread pool.
 		}
+	}
+
+	@Override
+	public void setChanged() {
+		super.setChanged();
+		gameState.update(cells, snakes);
 	}
 
 	// Marks the game as finished, triggering a graceful shutdown process. This method should be called when the game is to be concluded.

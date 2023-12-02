@@ -40,32 +40,32 @@ public class BoardComponent extends JComponent implements KeyListener{
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		final double CELL_WIDTH=getHeight()/(double)SnakeGui.NUM_ROWS;
-		System.err.println("W:"+getWidth()+" H:"+getHeight());
+		final double CELL_WIDTH = getHeight() / (double)SnakeGui.NUM_ROWS;
+		System.err.println("W:" + getWidth() + " H:"+ getHeight());
 		for (int x = 0; x < LocalBoard.NUM_COLUMNS; x++) {
 			for (int y = 0; y < LocalBoard.NUM_ROWS; y++) {
 				Cell cell = board.getCell(new BoardPosition(x, y));
 				Image image = null;
-				if(cell.getGameElement()!=null) 
+				if(cell.getGameElement() != null)
 					if(cell.getGameElement() instanceof Obstacle) {
-						Obstacle obstacle=(Obstacle)cell.getGameElement();
+						Obstacle obstacle = (Obstacle)cell.getGameElement();
 						image = obstacleImage;
 						g.setColor(Color.BLACK);
-						g.drawImage(image, (int)Math.round(cell.getPosition().x* CELL_WIDTH),
-								(int)Math.round(cell.getPosition().y* CELL_WIDTH),
+						g.drawImage(image, (int)Math.round(cell.getPosition().x*CELL_WIDTH),
+								(int)Math.round(cell.getPosition().y*CELL_WIDTH),
 								(int)Math.round(CELL_WIDTH),(int)Math.round(CELL_WIDTH), null);
 						// Write number of remaining moves.
 						g.setColor(Color.WHITE);
-						g.setFont(new Font(Font.MONOSPACED,Font.PLAIN,(int)CELL_WIDTH));
-						g.drawString(obstacle.getRemainingMoves()+"", (int)Math.round((cell.getPosition().x+0.15)* CELL_WIDTH), 
-								(int)Math.round((cell.getPosition().y+0.9) * CELL_WIDTH));
+						g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, (int)CELL_WIDTH));
+						g.drawString(obstacle.getRemainingMoves() + "", (int)Math.round((cell.getPosition().x + 0.15)* CELL_WIDTH),
+								(int)Math.round((cell.getPosition().y + 0.9) * CELL_WIDTH));
 					}
 					else if(cell.getGameElement() instanceof Goal) {
 						Goal goal=(Goal)cell.getGameElement() ;
 						g.setColor(Color.RED);
 						g.setFont(new Font(Font.MONOSPACED,Font.PLAIN,(int)CELL_WIDTH));
-						g.drawString(goal.getValue()+"", (int)Math.round((cell.getPosition().x+0.15)* CELL_WIDTH), 
-								(int)Math.round((cell.getPosition().y+0.9) * CELL_WIDTH));
+						g.drawString(goal.getValue()+"", (int)Math.round((cell.getPosition().x + 0.15)* CELL_WIDTH),
+								(int)Math.round((cell.getPosition().y + 0.9) * CELL_WIDTH));
 					}
 				if (cell.isOccupiedBySnake()) {
 					// Different color for human player.
@@ -73,23 +73,23 @@ public class BoardComponent extends JComponent implements KeyListener{
 						g.setColor(Color.ORANGE);
 					else
 						g.setColor(Color.LIGHT_GRAY);
-					g.fillRect((int)Math.round(cell.getPosition().x* CELL_WIDTH), (int)Math.round(cell.getPosition().y * CELL_WIDTH),
+					g.fillRect((int)Math.round(cell.getPosition().x*CELL_WIDTH), (int)Math.round(cell.getPosition().y * CELL_WIDTH),
 							(int)Math.round(CELL_WIDTH), (int)Math.round(CELL_WIDTH));
 					
 				}
 
 			}
 			g.setColor(Color.BLACK);
-			g.drawLine((int)Math.round(x * CELL_WIDTH), 0, (int)Math.round(x * CELL_WIDTH),
+			g.drawLine((int)Math.round(x*CELL_WIDTH), 0, (int)Math.round(x*CELL_WIDTH),
 					(int)Math.round(LocalBoard.NUM_ROWS*CELL_WIDTH));
 		}
 		for (int y = 1; y < LocalBoard.NUM_ROWS; y++) {
-			g.drawLine(0, (int)Math.round(y * CELL_WIDTH), (int)Math.round(LocalBoard.NUM_COLUMNS*CELL_WIDTH), 
+			g.drawLine(0, (int)Math.round(y*CELL_WIDTH), (int)Math.round(LocalBoard.NUM_COLUMNS*CELL_WIDTH),
 					(int)Math.round(y* CELL_WIDTH));
 		}
 		for (Snake s : board.getSnakes()) {
 			if (s.getLength() > 0) {
-				g.setColor(new Color(s.getIdentification() * 1000));
+				g.setColor(new Color(s.getIdentification()*1000));
 
 				((Graphics2D) g).setStroke(new BasicStroke(5));
 				BoardPosition prevPos=s.getPath().getFirst();
