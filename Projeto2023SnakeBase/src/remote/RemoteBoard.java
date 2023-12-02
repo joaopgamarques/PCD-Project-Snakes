@@ -1,17 +1,7 @@
 package remote;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.PrintWriter;
-import java.util.LinkedList;
-
-import environment.LocalBoard;
 import environment.Board;
-import environment.BoardPosition;
-import environment.Cell;
-import game.Goal;
-import game.Obstacle;
-import game.Snake;
+import environment.GameState;
 
 /** Remote representation of the game, no local threads involved.
  * Game state will be changed when updated info is received from Server.
@@ -19,7 +9,14 @@ import game.Snake;
  * @author luismota
  *
  */
+
 public class RemoteBoard extends Board {
+
+	public void setChanged(GameState GameState) {
+		this.cells = GameState.getCells();
+		this.snakes = GameState.getSnakes();
+		super.setChanged();
+	}
 	
 	@Override
 	public void handleKeyPress(int keyCode) {

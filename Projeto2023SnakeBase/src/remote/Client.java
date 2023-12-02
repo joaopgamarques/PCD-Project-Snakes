@@ -1,6 +1,7 @@
 package remote;
 
 
+import environment.GameState;
 import environment.LocalBoard;
 import gui.SnakeGui;
 
@@ -11,6 +12,7 @@ import gui.SnakeGui;
  */
 
 public class Client {
+	private GameState gameState;
 
 	public static void main(String[] args) {
 		// TODO

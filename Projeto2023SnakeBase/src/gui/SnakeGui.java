@@ -12,6 +12,7 @@ import javax.swing.*;
 import environment.Board;
 import environment.LocalBoard;
 import game.Snake;
+import remote.RemoteBoard;
 
 /**
  *  Class to create and configure GUI.
