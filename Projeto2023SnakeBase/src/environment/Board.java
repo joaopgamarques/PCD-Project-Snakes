@@ -113,44 +113,17 @@ public abstract class Board extends Observable {
 		return isFinished;
 	}
 
+	// Attempts to find an unoccupied position on the board, starting with random locations.
+	public BoardPosition getUnoccupiedPosition() {
+		while(true) {
+			BoardPosition position = getRandomPosition();
+			if(!getCell(position).isOccupied() && !getCell(position).isOcupiedByGoal()) {
+				return position;
+			}
+		}
+	}
+
 	public abstract void handleKeyPress(int keyCode);
 
 	public abstract void handleKeyRelease();
-
-	// Attempts to find an unoccupied position on the board, starting with random locations.
-	// If an unoccupied position cannot be found after a number of random attempts, an exhaustive search is triggered.
-	public BoardPosition getUnoccupiedPosition(BoardPosition currentPosition) {
-		Random random = new Random();
-		int attempts = 0;
-		int maxAttempts = 10;
-
-		while (attempts < maxAttempts) {
-			int x = random.nextInt(NUM_COLUMNS);
-			int y = random.nextInt(NUM_ROWS);
-			BoardPosition position = new BoardPosition(x, y);
-			if (!getCell(position).isOccupied() && !getCell(position).isOcupiedByGoal()) {
-				return position;
-			}
-			attempts++;
-		}
-		return getUnoccupiedPositionExhaustiveSearch(currentPosition);
-	}
-
-	// Performs an exhaustive search over the entire board to find an unoccupied position.
-	public BoardPosition getUnoccupiedPositionExhaustiveSearch(BoardPosition currentPosition) {
-		List<BoardPosition> unoccupiedPositions = new ArrayList<>();
-		for (int x = 0; x < NUM_COLUMNS; x++) {
-			for (int y = 0; y < NUM_ROWS; y++) {
-				BoardPosition position = new BoardPosition(x, y);
-				if (!getCell(position).isOccupied() && !getCell(position).isOcupiedByGoal()) {
-					unoccupiedPositions.add(position);
-				}
-			}
-		}
-		if (unoccupiedPositions.isEmpty()) {
-			System.out.println("All positions on the board are already occupied.");
-			return currentPosition;
-		}
-		return unoccupiedPositions.get(new Random().nextInt(unoccupiedPositions.size()));
-	}
 }

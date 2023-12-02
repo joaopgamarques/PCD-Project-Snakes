@@ -142,7 +142,7 @@ public class Cell {
 			// Obtain the cell object for the current position.
 			Cell currentCell = board.getCell(currentPosition);
 			// Find a new unoccupied position for the goal.
-			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			BoardPosition nextPosition = board.getUnoccupiedPosition();
 			// Obtain the cell object for the next position.
 			Cell nextCell = board.getCell(nextPosition);
 
@@ -199,7 +199,7 @@ public class Cell {
 			// Retrieve the current position of the obstacle.
 			BoardPosition currentPosition = obstacle.getCurrentPosition();
 			// Find a new position for the obstacle that is currently unoccupied.
-			BoardPosition nextPosition = board.getUnoccupiedPosition(currentPosition);
+			BoardPosition nextPosition = board.getUnoccupiedPosition();
 			// Obtain the cell objects for both the current and next positions.
 			Cell currentCell = board.getCell(currentPosition);
 			Cell nextCell = board.getCell(nextPosition);

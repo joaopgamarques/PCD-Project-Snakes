@@ -1,7 +1,8 @@
-package game;
+package environment;
 
 import environment.Cell;
 import environment.LocalBoard;
+import game.Snake;
 
 import java.io.Serializable;
 import java.util.List;

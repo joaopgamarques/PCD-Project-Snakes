@@ -76,6 +76,10 @@ public class LocalBoard extends Board {
 		obstacleMoverThreadPool.shutdown();
 	}
 
+	public GameState getGameState() {
+		return gameState;
+	}
+
 	@Override
 	public void handleKeyPress(int keyCode) {
 		// do nothing... No keys relevant in local game
