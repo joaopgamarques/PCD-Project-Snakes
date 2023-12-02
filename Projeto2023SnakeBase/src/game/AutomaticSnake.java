@@ -25,6 +25,12 @@ public class AutomaticSnake extends Snake {
 		// TODO: automatic movement.
 		System.out.println(Thread.currentThread().getName() + ": Started.");
 
+		try {
+			Thread.sleep(Board.REMOTE_CONNECTION_SETUP_DELAY);
+		} catch (InterruptedException e) {
+			System.out.println(Thread.currentThread().getName() + ": Interrupted during initial wait.");
+		}
+
 		// Check if the game has finished before starting the loop.
 		if (getBoard().isFinished()) {
 			System.out.println(Thread.currentThread().getName() + ": Game already finished.");

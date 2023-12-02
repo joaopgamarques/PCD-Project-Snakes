@@ -6,7 +6,9 @@ package environment;
  *
  */
 
-public class BoardPosition implements Comparable<BoardPosition> {
+import java.io.Serializable;
+
+public class BoardPosition implements Serializable, Comparable<BoardPosition> {
 	public final int x;
 	public final int y;
 

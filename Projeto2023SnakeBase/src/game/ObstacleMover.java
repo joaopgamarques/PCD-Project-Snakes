@@ -1,5 +1,6 @@
 package game;
 
+import environment.Board;
 import environment.Cell;
 import environment.LocalBoard;
 
@@ -10,7 +11,6 @@ public class ObstacleMover extends Thread {
 	public ObstacleMover(Obstacle obstacle, LocalBoard board) {
 		this.obstacle = obstacle;
 		this.board = board;
-		this.board.addObstacleMover(this);
 	}
 
 	// Movement logic for the obstacle, runs until game ends or moves are exhausted.

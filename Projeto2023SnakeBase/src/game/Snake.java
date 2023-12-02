@@ -14,7 +14,7 @@ import environment.LocalBoard;
  * @author luismota
  *
  */
-public abstract class Snake extends Thread implements Serializable{
+public abstract class Snake extends Thread implements Serializable {
 	protected LinkedList<Cell> cells = new LinkedList<Cell>();
 	protected int size = 5;
 	private final int id;
