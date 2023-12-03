@@ -7,11 +7,8 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
-import environment.Board;
 import environment.GameState;
-import environment.LocalBoard;
 import gui.SnakeGui;
 
 /** Remore client, only for part II
@@ -35,7 +32,7 @@ public class Client {
 	}
 
 	// Runs the client to connect to the server and update the game state.
-	public void runClient() {
+	public void run() {
 		try {
 			connectToServer(); // Connect to the server.
 			// Continuously process game updates from the server.
@@ -94,6 +91,6 @@ public class Client {
 		SnakeGui game = new SnakeGui(board,1000,0);
 		game.init();
 		Client client = new Client(InetAddress.getByName("localhost"), 12345, board);
-		client.runClient();
+		client.run();
 	}
 }

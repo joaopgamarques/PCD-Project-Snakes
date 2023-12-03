@@ -6,8 +6,6 @@ import environment.LocalBoard;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
@@ -22,7 +20,7 @@ public class Server {
     }
 
     // Starts the server and listens for incoming client connections.
-    public void runServer() {
+    public void run() {
         try {
             // Create a server socket bound to port 12345.
             server = new ServerSocket(12345, 1);
