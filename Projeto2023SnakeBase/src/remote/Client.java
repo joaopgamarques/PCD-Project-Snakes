@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -38,11 +39,13 @@ public class Client {
 		try {
 			connectToServer(); // Connect to the server.
 			// Continuously process game updates from the server.
-			while (!Thread.currentThread().isInterrupted()) {
+			while (!connection.isClosed() && !Thread.currentThread().isInterrupted()) {
 				// connectToServer(); // Establish a connection to the server.
 				getStreams(); // Setup I/O streams.
 				processConnection(); // Process the incoming game state.
 			}
+		} catch (SocketException e) {
+			System.out.println("Connection closed by server.");
 		} catch (IOException e) {
 			System.err.println("Client error: " + e.getMessage());
 		} finally {
@@ -58,28 +61,26 @@ public class Client {
 
 	// Sets up the I/O streams for communication with the server.
 	private void getStreams() throws IOException {
-		try {
-			// Input
-			in = new ObjectInputStream(connection.getInputStream());
-			GameState gameState = (GameState)in.readObject();
-			remoteBoard.setChanged(gameState);
-			// Output
-			out = new PrintWriter(connection.getOutputStream(), true);
-		} catch (ClassNotFoundException | IOException e) {
-			System.err.println("Error processing connection: " + e.getMessage());
-		}
+		in = new ObjectInputStream(connection.getInputStream()); // Input stream.
+		out = new PrintWriter(connection.getOutputStream(), true); // Output stream.
 	}
 
 	// Handles communication with the server.
-	private void processConnection() {
-
+	private void processConnection() throws IOException {
+		try {
+			GameState gameState = (GameState)in.readObject();
+			remoteBoard.setChanged(gameState);
+		} catch (ClassNotFoundException e) {
+			System.err.println("Class not found: " + e.getMessage());
+			throw new IOException("Failed to deserialize object", e);
+		}
 	}
 
 	// Closes the I/O streams and the socket.
 	private void closeConnection() {
 		try {
-			if (out!= null) out.close(); // Close the output stream.
 			if (in != null) in.close(); // Close the input stream.
+			if (out != null) out.close(); // Close the output stream.
 			if (connection != null) connection.close();
 			System.out.println("Connection closed.");
 		} catch (IOException e) {

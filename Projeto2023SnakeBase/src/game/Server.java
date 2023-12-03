@@ -5,8 +5,7 @@ import environment.LocalBoard;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
@@ -64,12 +63,14 @@ public class Server {
         public void run() {
             try {
                 // Continuously send updated game state to the client.
-                while (!Thread.currentThread().isInterrupted()) {
+                while (!connection.isClosed() && !Thread.currentThread().isInterrupted()) {
                     getStreams();
                     processConnection();
                 }
+            } catch (SocketException e) {
+                System.out.println("Connection closed by server.");
             } catch (IOException e) {
-                System.out.println("IOException in ConnectionHandler: " + e.getMessage());
+                 System.out.println("IOException in ConnectionHandler: " + e.getMessage());
             } finally {
                 closeConnection(); // Close the connection when done.
             }
@@ -77,16 +78,14 @@ public class Server {
 
         // Sets up the I/O streams for communication with the client.
         private void getStreams() throws IOException {
-            // Output
-            out = new ObjectOutputStream(connection.getOutputStream());
-            out.writeObject(localBoard.getGameState()); // Send the game state to the client.
-            out.flush(); // Flush the stream to ensure the data is sent.
-            // Input
-            in = new Scanner(connection.getInputStream()); // Initialize the input stream.
+            out = new ObjectOutputStream(connection.getOutputStream()); // Output stream.
+            in = new Scanner(connection.getInputStream()); // Input stream.
         }
 
         // Handles communication with the client.
-        private void processConnection() {
+        private void processConnection() throws IOException {
+            out.writeObject(localBoard.getGameState()); // Send the game state to the client.
+            out.flush(); // Flush the stream to ensure the data is sent.
             try {
                 Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
             } catch (InterruptedException e) {
@@ -98,9 +97,9 @@ public class Server {
         // Closes the client connection and associated streams.
         private void closeConnection() {
             try {
-                if (connection != null && !connection.isClosed()) connection.close();
                 if (out!= null) out.close(); // Close the output stream.
                 if (in != null) in.close(); // Close the input stream.
+                if (connection != null && !connection.isClosed()) connection.close();
             } catch (IOException e) {
                 System.out.println("IOException on closing connection: " + e.getMessage());
             }
