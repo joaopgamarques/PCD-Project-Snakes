@@ -80,7 +80,6 @@ public class Server {
             // Output
             out = new ObjectOutputStream(connection.getOutputStream());
             out.writeObject(localBoard.getGameState()); // Send the game state to the client.
-            // out.reset(); // Reset the output stream to avoid object caching.
             out.flush(); // Flush the stream to ensure the data is sent.
             // Input
             in = new Scanner(connection.getInputStream()); // Initialize the input stream.
