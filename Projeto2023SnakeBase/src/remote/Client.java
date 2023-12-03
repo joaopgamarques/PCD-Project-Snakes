@@ -34,10 +34,9 @@ public class Client {
 	// Runs the client to connect to the server and update the game state.
 	public void run() {
 		try {
-			connectToServer(); // Connect to the server.
+			connectToServer(); // Establish a connection to the server.
 			// Continuously process game updates from the server.
 			while (!connection.isClosed() && !Thread.currentThread().isInterrupted()) {
-				// connectToServer(); // Establish a connection to the server.
 				getStreams(); // Setup I/O streams.
 				processConnection(); // Process the incoming game state.
 			}
