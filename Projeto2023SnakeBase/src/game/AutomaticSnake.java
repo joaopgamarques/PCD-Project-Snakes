@@ -30,6 +30,7 @@ public class AutomaticSnake extends Snake {
 		} catch (InterruptedException e) {
 			System.out.println(Thread.currentThread().getName() + ": Interrupted during initial wait.");
 		}
+		isIdle = false;
 
 		// Check if the game has finished before starting the loop.
 		if (getBoard().isFinished()) {

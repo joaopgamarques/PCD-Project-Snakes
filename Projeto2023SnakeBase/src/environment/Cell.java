@@ -191,55 +191,51 @@ public class Cell implements Serializable {
 
 	// Moves an obstacle from one cell to another in a thread-safe manner.
 	public static void obstacleMoveHandler(Obstacle obstacle) {
-		boolean hasObstacleMovedSucessfully = false;
+		Lock firstLock, secondLock;
 
-		while (!Thread.currentThread().isInterrupted() && !hasObstacleMovedSucessfully) {
-			Lock firstLock, secondLock;
+		// Get the board context for the obstacle.
+		Board board = obstacle.getBoard();
+		// Retrieve the current position of the obstacle.
+		BoardPosition currentPosition = obstacle.getCurrentPosition();
+		// Find a new position for the obstacle that is currently unoccupied.
+		BoardPosition nextPosition = board.getUnoccupiedPosition();
+		// Obtain the cell objects for both the current and next positions.
+		Cell currentCell = board.getCell(currentPosition);
+		Cell nextCell = board.getCell(nextPosition);
 
-			// Get the board context for the obstacle.
-			Board board = obstacle.getBoard();
-			// Retrieve the current position of the obstacle.
-			BoardPosition currentPosition = obstacle.getCurrentPosition();
-			// Find a new position for the obstacle that is currently unoccupied.
-			BoardPosition nextPosition = board.getUnoccupiedPosition();
-			// Obtain the cell objects for both the current and next positions.
-			Cell currentCell = board.getCell(currentPosition);
-			Cell nextCell = board.getCell(nextPosition);
+		// Determine the order of locks based on the positions of the cells to avoid deadlocks.
+		// Locks are always acquired in a consistent global order.
+		if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
+			firstLock = currentCell.getLock();
+			secondLock = nextCell.getLock();
+		} else {
+			firstLock = nextCell.getLock();
+			secondLock = currentCell.getLock();
+		}
 
-			// Determine the order of locks based on the positions of the cells to avoid deadlocks.
-			// Locks are always acquired in a consistent global order.
-			if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
-				firstLock = currentCell.getLock();
-				secondLock = nextCell.getLock();
-			} else {
-				firstLock = nextCell.getLock();
-				secondLock = currentCell.getLock();
-			}
-
-			// Acquire the first lock.
-			firstLock.lock();
+		// Acquire the first lock.
+		firstLock.lock();
+		try {
+			// Acquire the second lock.
+			secondLock.lock();
 			try {
-				// Acquire the second lock.
-				secondLock.lock();
-				try {
-					// Check if the next cell is suitable for the move.
-					if (!nextCell.isOccupied()) {
-						// Remove obstacle from the current cell.
-						currentCell.removeObstacle();
-						// Place the obstacle in the destination cell.
-						nextCell.setGameElement(obstacle);
-						// Once the obstacle has been moved, decrement its remaining moves count.
-						obstacle.decrementRemainingMoves();
-						hasObstacleMovedSucessfully = true;
-					}
-				} finally {
-					// Ensure the second lock is released.
-					secondLock.unlock();
+				// Check if the next cell is suitable for the move.
+				if (!nextCell.isOccupied()) {
+					// Remove obstacle from the current cell.
+					currentCell.removeObstacle();
+					// Place the obstacle in the destination cell.
+					nextCell.setGameElement(obstacle);
+					// Once the obstacle has been moved, decrement its remaining moves count.
+					obstacle.decrementRemainingMoves();
+					// hasObstacleMovedSucessfully = true;
 				}
 			} finally {
-				// Ensure the first lock is released.
-				firstLock.unlock();
+				// Ensure the second lock is released.
+				secondLock.unlock();
 			}
+		} finally {
+			// Ensure the first lock is released.
+			firstLock.unlock();
 		}
 	}
 }

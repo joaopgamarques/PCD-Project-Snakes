@@ -1,10 +1,12 @@
 package environment;
 
-import java.io.Serial;
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import game.*;
 
@@ -16,7 +18,7 @@ import game.*;
 public class LocalBoard extends Board {
 	private static final int NUM_SNAKES = 2;
 	private static final int NUM_OBSTACLES = 25;
-	private static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3;
+	public static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3;
 	private transient final ExecutorService obstacleMoverThreadPool; // ExecutorService to manage ObstacleMover threads.
 	private GameState gameState;
 
@@ -81,6 +83,16 @@ public class LocalBoard extends Board {
 
 	public GameState getGameState() {
 		return gameState;
+	}
+
+	// Checks if all automatic snakes on the board are idle.
+	public boolean areAllSnakesIdle() {
+		for (Snake snake : getSnakes()) {
+			if (snake instanceof AutomaticSnake && !snake.isIdle()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

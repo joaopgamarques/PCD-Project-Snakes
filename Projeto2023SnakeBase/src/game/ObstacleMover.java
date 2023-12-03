@@ -4,6 +4,8 @@ import environment.Board;
 import environment.Cell;
 import environment.LocalBoard;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class ObstacleMover extends Thread {
 	private final Obstacle obstacle;
 	private final LocalBoard board;
@@ -19,6 +21,15 @@ public class ObstacleMover extends Thread {
 		// TODO
 		Thread.currentThread().setName("Obstacle " + obstacle.getId());
 		System.out.println(Thread.currentThread().getName() + ": Started.");
+
+		// Checks if all automatic snakes on the board are idle.
+		if (((LocalBoard)board).areAllSnakesIdle()) {
+			try {
+				Thread.sleep(Board.REMOTE_CONNECTION_SETUP_DELAY);
+			} catch (InterruptedException e) {
+				System.out.println(Thread.currentThread().getName() + ": Interrupted during initial wait.");
+			}
+		}
 
 		// Check if the game has finished before starting the loop.
 		if (board.isFinished()) {

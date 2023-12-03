@@ -20,6 +20,7 @@ public abstract class Snake extends Thread implements Serializable {
 	private final int id;
 	private final Board board;
 	private int growthPending = 0;
+	protected volatile boolean isIdle = true;
 	
 	public Snake(int id, Board board) {
 		this.id = id;
@@ -89,6 +90,11 @@ public abstract class Snake extends Thread implements Serializable {
 			coordinates.add(cell.getPosition());
 		}
 		return coordinates;
+	}
+
+	// Checks if the snake is currently idle.
+	public boolean isIdle() {
+		return isIdle;
 	}
 
 	// Determines the initial position of the snake on the board.
