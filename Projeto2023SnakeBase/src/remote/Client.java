@@ -21,8 +21,8 @@ public class Client {
 	private Socket connection; // Client socket for communicating with the server.
 	private final InetAddress serverName; // IP address of the server.
 	private final int port; // Port number of the server.
-	private ObjectInputStream in; // Input stream to receive game state from the server.
-	private PrintWriter out; // Output stream.
+	private ObjectInputStream in; // Stream for receiving data from the server.
+	private PrintWriter out; // Stream for sending data to the server.
 	private final RemoteBoard remoteBoard;
 
 	public Client(InetAddress byName, int port, RemoteBoard remoteBoard) {
