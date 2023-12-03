@@ -29,6 +29,7 @@ public class Client {
 		this.serverName = byName;
 		this.port = port;
 		this.remoteBoard = remoteBoard;
+		remoteBoard.setClient(this);
 	}
 
 	// Runs the client to connect to the server and update the game state.
@@ -81,6 +82,14 @@ public class Client {
 			System.out.println("Connection closed.");
 		} catch (IOException e) {
 			System.err.println("Error closing connection: " + e.getMessage());
+		}
+	}
+
+	// Sends a direction command to the server.
+	public void sendDirection(Direction direction) {
+		if (out != null) {
+			System.out.println(direction.toString());
+			out.println(direction.toString());
 		}
 	}
 

@@ -9,14 +9,21 @@ import java.net.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     // TODO
     private ServerSocket server; // ServerSocket to listen for incoming connections.
     private final LocalBoard localBoard; // The local board that maintains the game state.
+    private final ExecutorService clientExecutor; // Thread pool for handling client connections.
+    private final ConcurrentHashMap<String, ConnectionHandler> activeConnections; // Map to track active client connections.
 
     public Server(LocalBoard localBoard) {
         this.localBoard = localBoard;
+        this.clientExecutor = Executors.newCachedThreadPool();
+        this.activeConnections = new ConcurrentHashMap<>();
     }
 
     // Starts the server and listens for incoming client connections.
@@ -43,8 +50,16 @@ public class Server {
         System.out.println("Waiting for connection.");
         Socket connection = server.accept(); // Accept the incoming connection.
         ConnectionHandler connectionHandler = new ConnectionHandler(connection);
-        connectionHandler.start(); // Start the thread to process the connection.
-        System.out.println("[new connection] " + connection.getInetAddress().getHostAddress());
+        // Create a unique key based on client's IP and port.
+        String clientKey = connection.getInetAddress().getHostAddress() + ":" + connection.getPort();
+
+        // Check if the client is not already connected or if its handler thread is not alive.
+        if (!activeConnections.containsKey(clientKey) || !activeConnections.get(clientKey).isAlive()) {
+            ConnectionHandler handler = new ConnectionHandler(connection); // Create a new connection handler.
+            activeConnections.put(clientKey, handler); // Store handler in active connections map.
+            clientExecutor.execute(handler); // Execute the handler in the thread pool.
+            System.out.println("[new connection] " + clientKey);
+        }
     }
 
     // Inner class to handle client connections.
@@ -68,9 +83,12 @@ public class Server {
             } catch (SocketException e) {
                 System.out.println("Connection closed by server.");
             } catch (IOException e) {
-                 System.out.println("IOException in ConnectionHandler: " + e.getMessage());
+                System.out.println("IOException in ConnectionHandler: " + e.getMessage());
             } finally {
                 closeConnection(); // Close the connection when done.
+                // On completion or disconnection, remove from activeConnections.
+                String clientKey = connection.getInetAddress().getHostAddress() + ":" + connection.getPort();
+                activeConnections.remove(clientKey); // Remove the connection from active connections map.
             }
         }
 
@@ -84,6 +102,13 @@ public class Server {
         private void processConnection() throws IOException {
             out.writeObject(localBoard.getGameState()); // Send the game state to the client.
             out.flush(); // Flush the stream to ensure the data is sent.
+            /*
+            if (in.hasNext()) {
+                String command = in.nextLine();
+                System.out.println("Received command: " + command);
+
+            }
+             */
             try {
                 Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
             } catch (InterruptedException e) {
