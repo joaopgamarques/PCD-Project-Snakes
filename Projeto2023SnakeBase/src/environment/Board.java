@@ -1,13 +1,14 @@
 package environment;
 
+import java.io.Serializable;
 import java.util.*;
 
 import game.*;
 
-public abstract class Board extends Observable {
+public abstract class Board extends Observable implements Serializable {
 	protected Cell[][] cells;
 	private BoardPosition goalPosition;
-	public static final long PLAYER_PLAY_INTERVAL = 100;
+	public static final long PLAYER_PLAY_INTERVAL = 100; // 100
 	public static final long REMOTE_REFRESH_INTERVAL = 200;
 	public static final long REMOTE_CONNECTION_SETUP_DELAY = 10000;
 	public static final int NUM_COLUMNS = 30;

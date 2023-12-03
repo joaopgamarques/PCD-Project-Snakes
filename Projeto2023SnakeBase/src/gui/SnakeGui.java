@@ -51,7 +51,7 @@ public class SnakeGui implements Observer {
 			public void actionPerformed(ActionEvent e) {
 				// TODO
 				board.getSnakes().forEach(snake -> {
-					if(!snake.isInterrupted() && snake.isAlive()) {
+					if(!snake.isInterrupted() && snake.isAlive() && board instanceof LocalBoard) {
 						snake.interrupt();
 					}
 				});

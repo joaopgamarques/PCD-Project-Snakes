@@ -1,5 +1,7 @@
 package environment;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +17,7 @@ public class LocalBoard extends Board {
 	private static final int NUM_SNAKES = 2;
 	private static final int NUM_OBSTACLES = 25;
 	private static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3;
-	private final ExecutorService obstacleMoverThreadPool; // ExecutorService to manage ObstacleMover threads.
+	private transient final ExecutorService obstacleMoverThreadPool; // ExecutorService to manage ObstacleMover threads.
 	private GameState gameState;
 
 	public LocalBoard() {
@@ -56,6 +58,7 @@ public class LocalBoard extends Board {
 		isFinished = true; // Signal all game entities that the game has ended.
 		snakes.forEach(snake -> snake.interrupt()); // Stop all snakes.
 		shutdownNow(); // Stop all obstacle movers.
+		gameState.update(cells, snakes);
 	}
 
 	// Shuts down the thread pool immediately and interrupts all running tasks.

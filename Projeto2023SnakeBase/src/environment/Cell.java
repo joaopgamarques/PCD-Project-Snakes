@@ -1,5 +1,6 @@
 package environment;
 
+import java.io.Serializable;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,7 +12,7 @@ import game.*;
  * @author luismota
  *
  */
-public class Cell {
+public class Cell implements Serializable {
 	private final BoardPosition position;
 	private Snake occupyingSnake = null;
 	private GameElement gameElement = null;
@@ -174,6 +175,7 @@ public class Cell {
 						// Set the goal in its new position and update the board's goal position.
 						nextCell.setGameElement(goal);
 						board.setGoalPosition(nextPosition);
+						System.out.println("Goal " + goal.getValue() + " placed at position " + goal.getCurrentPosition() + " .");
 						hasGoalMovedSucessfully = true;
 					}
 				} finally {
