@@ -9,7 +9,7 @@ public abstract class Board extends Observable {
 	protected Cell[][] cells;
 	private BoardPosition goalPosition;
 	public static final long PLAYER_PLAY_INTERVAL = 200; // 100
-	public static final long REMOTE_REFRESH_INTERVAL = 200; // 200
+	public static final long REMOTE_REFRESH_INTERVAL = 100; // 200
 	public static final long REMOTE_CONNECTION_SETUP_DELAY = 10000;
 	public static final int NUM_COLUMNS = 30;
 	public static final int NUM_ROWS = 30;
@@ -28,6 +28,10 @@ public abstract class Board extends Observable {
 
 	public Cell getCell(BoardPosition coordinates) {
 		return cells[coordinates.x][coordinates.y];
+	}
+
+	public Cell[][] getCells() {
+		return cells;
 	}
 
 	protected BoardPosition getRandomPosition() {

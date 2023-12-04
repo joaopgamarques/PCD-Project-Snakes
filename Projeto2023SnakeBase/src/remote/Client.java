@@ -19,26 +19,30 @@ import gui.SnakeGui;
 
 public class Client {
 	private Socket connection; // Client socket for communicating with the server.
-	private final InetAddress serverName; // IP address of the server.
+	private final InetAddress server; // IP address of the server.
 	private final int port; // Port number of the server.
 	private ObjectInputStream in; // Stream for receiving data from the server.
 	private PrintWriter out; // Stream for sending data to the server.
 	private final RemoteBoard remoteBoard;
 
-	public Client(InetAddress byName, int port, RemoteBoard remoteBoard) {
-		this.serverName = byName;
+	public Client(InetAddress server, int port, RemoteBoard remoteBoard) {
+		this.server = server;
 		this.port = port;
 		this.remoteBoard = remoteBoard;
 		remoteBoard.setClient(this);
+	}
+
+	public PrintWriter getOut() {
+		return out;
 	}
 
 	// Runs the client to connect to the server and update the game state.
 	public void run() {
 		try {
 			connectToServer(); // Establish a connection to the server.
+			getStreams(); // Setup I/O streams.
 			// Continuously process game updates from the server.
-			while (!connection.isClosed() && !Thread.currentThread().isInterrupted()) {
-				getStreams(); // Setup I/O streams.
+			while (!connection.isClosed()) {
 				processConnection(); // Process the incoming game state.
 			}
 		} catch (SocketException e) {
@@ -52,8 +56,8 @@ public class Client {
 
 	// Establishes a connection to the server.
 	private void connectToServer() throws IOException {
-		connection = new Socket(serverName, port);
-		System.out.println("Connected to server at " + serverName + ".");
+		connection = new Socket(server, port);
+		System.out.println("Connected to server at " + server + ".");
 	}
 
 	// Sets up the I/O streams for communication with the server.
@@ -65,11 +69,11 @@ public class Client {
 	// Handles communication with the server.
 	private void processConnection() throws IOException {
 		try {
-			GameState gameState = (GameState)in.readObject();
+			Object object = in.readObject();
+			GameState gameState = (GameState)object;
 			remoteBoard.setChanged(gameState);
 		} catch (ClassNotFoundException e) {
 			System.err.println("Class not found: " + e.getMessage());
-			throw new IOException("Failed to deserialize object", e);
 		}
 	}
 
