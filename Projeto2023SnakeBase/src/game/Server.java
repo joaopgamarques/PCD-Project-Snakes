@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Server {
@@ -105,7 +106,7 @@ public class Server {
                 synchronized (incomingConnections) {
                     incomingConnections.add(ConnectionHandler.this);
                 }
-                while (!connection.isClosed()) { // ATENÇÃO NÃO ESTÁ A RECONHECER SE A LIGAÇÃO ESTÁ FECHADA.
+                while (!connection.isClosed()) {
                     processConnection();
                 }
             } catch (SocketException e) {
@@ -113,7 +114,7 @@ public class Server {
             } catch (IOException e) {
                 System.out.println("IOException in ConnectionHandler: " + e.getMessage() + ".");
             } finally {
-                closeConnection(); // Close the connection when done. // ATENÇÃO NÃO ESTÁ A SER EXECUTADA.
+                closeConnection(); // Close the connection when done.
             }
         }
 
@@ -132,19 +133,22 @@ public class Server {
                 System.out.println("Sending the game state to client " + connection.getPort() + ".");
             } catch (IOException e) {
                 System.out.println("Error sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
-                // closeConnection(); // ATENÇÃO NÃO DEVERIA SER LANÇADA AQUI.
             }
         }
 
         // Handles communication with the client.
         private void processConnection() throws IOException {
-            /*
-            if (in.hasNextLine()) {
-                String command = in.nextLine();
-                System.out.println("Received command: " + command);
-                // Process command here...
+            try {
+                if (in.hasNextLine()) {
+                    String command = in.nextLine();
+                    System.out.println("Received command: " + command);
+                    // Process command here...
+                } else {
+                    throw new IOException("Client " + connection.getPort() + " connection might be closed.");
+                }
+            } catch (NoSuchElementException e) {
+                throw new IOException("Client " + connection.getPort() + " disconnected.", e);
             }
-             */
         }
 
         // Closes the client connection and associated streams.
