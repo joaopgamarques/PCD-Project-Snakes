@@ -4,8 +4,6 @@ import environment.Board;
 import environment.Cell;
 import environment.LocalBoard;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class ObstacleMover extends Thread {
 	private final Obstacle obstacle;
 	private final LocalBoard board;

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Goal extends GameElement  {
 	private int value = 1;
-	private final Board board;
+	private transient final Board board;
 	public static final int MAX_VALUE = 10;
 	private BoardPosition currentPosition;
 

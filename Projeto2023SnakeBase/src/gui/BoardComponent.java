@@ -41,7 +41,7 @@ public class BoardComponent extends JComponent implements KeyListener{
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		final double CELL_WIDTH = getHeight() / (double)SnakeGui.NUM_ROWS;
-		System.err.println("W:" + getWidth() + " H:"+ getHeight());
+		// System.err.println("W:" + getWidth() + " H:"+ getHeight());
 		for (int x = 0; x < LocalBoard.NUM_COLUMNS; x++) {
 			for (int y = 0; y < LocalBoard.NUM_ROWS; y++) {
 				Cell cell = board.getCell(new BoardPosition(x, y));
