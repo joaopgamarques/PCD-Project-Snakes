@@ -9,15 +9,16 @@ import java.io.ObjectOutputStream;
 import java.net.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     // TODO
     private ServerSocket server; // ServerSocket to listen for incoming connections.
     private final LocalBoard localBoard; // The local board that maintains the game state.
-    private final ConcurrentHashMap<Integer, ConnectionHandler> connections = new ConcurrentHashMap<>();
+    private final Map<Integer, ConnectionHandler> connections = new HashMap<>();
 
     // Thread for broadcasting game state updates to all active clients.
     private final Thread multicastThread = new Thread(new Runnable() {
@@ -27,13 +28,15 @@ public class Server {
                 try {
                     // Delay between broadcasts.
                     Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
-                    System.out.println("Active connections: " + connections.size());
-                    // Get the current game state for broadcasting.
-                    GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
-                    // Broadcast the game state to each client.
-                    for (ConnectionHandler connection : connections.values()) {
-                        if (!connection.connection.isClosed()) {
-                            connection.multicastGameState(gameState);
+                    synchronized (connections) {
+                        System.out.println("Active connections: " + connections.size());
+                        // Get the current game state for broadcasting.
+                        GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
+                        // Broadcast the game state to each client.
+                        for (ConnectionHandler connection : connections.values()) {
+                            if (!connection.connection.isClosed()) {
+                                connection.multicastGameState(gameState);
+                            }
                         }
                     }
                 } catch (InterruptedException e) {
@@ -86,7 +89,9 @@ public class Server {
             this.connection = connection;
             this.snake = new HumanSnake(connection.getPort(), localBoard);
             addSnake(snake);
-            connections.put(connection.getPort(), this); // Add this connection handler to the map.
+            synchronized (connections) {
+                connections.put(connection.getPort(), this); // Add this connection handler to the map.
+            }
         }
 
         // Adds a new HumanSnake to the game when a client connection is established.
@@ -153,7 +158,9 @@ public class Server {
 
         // Closes the client connection and associated streams.
         private void closeConnection() {
-            connections.remove(connection.getPort()); // Remove this connection handler from the map.
+            synchronized (connections) {
+                connections.remove(connection.getPort()); // Remove this connection handler from the map.
+            }
             try {
                 if (out != null) out.close(); // Close the output stream.
                 if (in != null) in.close(); // Close the input stream.
