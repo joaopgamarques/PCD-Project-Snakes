@@ -97,6 +97,7 @@ public class Server {
         // Adds a new HumanSnake to the game when a client connection is established.
         private void addSnake(HumanSnake snake) {
             localBoard.addSnake(snake); // Add the snake to the local board.
+            localBoard.setChanged();
             snake.start(); // Start the snake's movement and logic.
         }
 
