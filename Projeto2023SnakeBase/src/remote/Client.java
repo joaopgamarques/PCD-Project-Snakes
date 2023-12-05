@@ -32,7 +32,7 @@ public class Client {
 		remoteBoard.setClient(this);
 	}
 
-	public PrintWriter getOut() {
+	public PrintWriter getPrintWriter() {
 		return out;
 	}
 
@@ -48,7 +48,7 @@ public class Client {
 		} catch (SocketException e) {
 			System.out.println("Connection closed by server.");
 		} catch (IOException e) {
-			System.err.println("Client error: " + e.getMessage());
+			System.err.println("Client error: " + e.getMessage() + ".");
 		} finally {
 			closeConnection(); // Close the connection when done or on error.
 		}
@@ -73,7 +73,7 @@ public class Client {
 			GameState gameState = (GameState)object;
 			remoteBoard.setChanged(gameState);
 		} catch (ClassNotFoundException e) {
-			System.err.println("Class not found: " + e.getMessage());
+			System.err.println("Class not found: " + e.getMessage() + ".");
 		}
 	}
 
@@ -85,15 +85,7 @@ public class Client {
 			if (connection != null) connection.close();
 			System.out.println("Connection closed.");
 		} catch (IOException e) {
-			System.err.println("Error closing connection: " + e.getMessage());
-		}
-	}
-
-	// Sends a direction command to the server.
-	public void sendDirection(Direction direction) {
-		if (out != null) {
-			System.out.println(direction.toString());
-			out.println(direction.toString());
+			System.err.println("Error on closing connection: " + e.getMessage() + ".");
 		}
 	}
 

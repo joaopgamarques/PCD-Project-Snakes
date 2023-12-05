@@ -41,7 +41,7 @@ public class Server {
                     // Broadcast the game state to each client.
                     for (ConnectionHandler connection : activeConnections) {
                         if (!connection.connection.isClosed()) {
-                            connection.broadcastGameState(gameState);
+                            connection.multicastGameState(gameState);
                         }
                     }
                     // Update the lists of connections.
@@ -63,9 +63,8 @@ public class Server {
     // Starts the server and listens for incoming client connections.
     public void run() {
         try {
-            // Create a server socket bound to port 12345.
-            server = new ServerSocket(12345);
-            multicastThread.start();
+            server = new ServerSocket(12345); // Create a server socket bound to port 12345.
+            multicastThread.start(); // Start multicasting.
             System.out.println("The server is running.");
             // Continuously listen for client connections as long as the server is not closed.
             while (!server.isClosed()) {
@@ -94,9 +93,25 @@ public class Server {
         private final Socket connection; // Socket representing the client connection.
         private ObjectOutputStream out; // Stream for sending data to the client.
         private Scanner in; // Stream for receiving data from the client.
+        private final HumanSnake snake; // Represents the snake controlled by the client connected through this handler.
 
         public ConnectionHandler(Socket connection) {
             this.connection = connection;
+            this.snake = new HumanSnake(connection.getPort(), localBoard);
+            addSnake(snake);
+        }
+
+        // Adds a new HumanSnake to the game when a client connection is established.
+        private void addSnake(HumanSnake snake) {
+            localBoard.addSnake(snake); // Add the snake to the local board.
+            snake.start(); // Start the snake's movement and logic.
+        }
+
+        // Removes the associated HumanSnake from the game.
+        private void removeSnake() {
+            localBoard.getSnakes().remove(snake); // Remove the snake from the board.
+            snake.getCells().forEach(cell -> cell.release()); // Release the cells occupied by the snake.
+            localBoard.setChanged();
         }
 
         @Override
@@ -112,7 +127,7 @@ public class Server {
             } catch (SocketException e) {
                 System.out.println("Connection closed by server.");
             } catch (IOException e) {
-                System.out.println("IOException in ConnectionHandler: " + e.getMessage() + ".");
+                System.out.println("Exception in ConnectionHandler: " + e.getMessage() + ".");
             } finally {
                 closeConnection(); // Close the connection when done.
             }
@@ -125,7 +140,7 @@ public class Server {
         }
 
         // Sends the updated game state to the clients.
-        public void broadcastGameState(GameState gameState) {
+        public void multicastGameState(GameState gameState) {
             try {
                 out.reset(); // Reset the ObjectOutputStream to ensure no stale objects are sent.
                 out.writeObject(gameState); // Send the game state to the client.
@@ -141,10 +156,10 @@ public class Server {
             try {
                 if (in.hasNextLine()) {
                     String command = in.nextLine();
-                    System.out.println("Received command: " + command);
+                    System.out.println("Received command from client " + connection.getPort() + ": " + command);
                     // Process command here...
                 } else {
-                    throw new IOException("Client " + connection.getPort() + " connection might be closed.");
+                    throw new IOException("Client " + connection.getPort() + " connection might be closed");
                 }
             } catch (NoSuchElementException e) {
                 throw new IOException("Client " + connection.getPort() + " disconnected.", e);
@@ -161,7 +176,9 @@ public class Server {
                 if (in != null) in.close(); // Close the input stream.
                 if (connection != null && !connection.isClosed()) connection.close();
             } catch (IOException e) {
-                System.out.println("IOException on closing connection: " + e.getMessage());
+                System.out.println("Exception on closing connection: " + e.getMessage() + ".");
+            } finally {
+                removeSnake();
             }
         }
     }

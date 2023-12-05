@@ -35,20 +35,22 @@ public class RemoteBoard extends Board {
 			case KeyEvent.VK_LEFT -> direction = Direction.LEFT;
 			case KeyEvent.VK_RIGHT -> direction = Direction.RIGHT;
 		}
+
+		// Sends a direction command to the server.
 		if (direction != null && client != null) {
-			client.sendDirection(direction);
+			System.out.println(direction.toString());
+			client.getPrintWriter().println(direction.toString());
 		}
 	}
 
 	@Override
 	public void handleKeyRelease() {
 		// TODO
-
+		client.getPrintWriter().flush();
 	}
 
 	@Override
 	public void init() {
 		// TODO 		
 	}
-
 }
