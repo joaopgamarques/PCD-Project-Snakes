@@ -167,11 +167,11 @@ public class Server {
             try {
                 if (in.hasNextLine()) {
                     processClientInput();
-                } else {
-                    throw new IOException("Client " + connection.getPort() + " connection might be closed");
                 }
-            } catch (NoSuchElementException e) {
-                throw new IOException("Client " + connection.getPort() + " disconnected.", e);
+            } catch (SocketException e) {
+                System.err.println("Client " + connection.getPort() + " disconnected.");
+            } catch (IOException e) {
+                System.err.println("IO Exception in ConnectionHandler: " + e.getMessage());
             }
         }
 
@@ -203,19 +203,20 @@ public class Server {
                 out.flush(); // Flush the stream to ensure the data is sent.
                 System.out.println("Sending the game state to client " + connection.getPort() + ".");
             } catch (IOException e) {
-                System.err.println("Error sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
+                System.err.println("Exception on sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
+                closeConnection(); // Close the connection if an error occurs while broadcasting.
             }
         }
 
         // Processes incoming commands from the client.
         private void processClientInput() throws IOException {
-            String direction = in.nextLine();
-            System.out.println("Received command from client " + connection.getPort() + ": " + direction);
-            if (!direction.equals("Stop.") && Direction.isDirection(direction)) {
-                snake.isIdle = false;
-                snake.setDirection(Direction.valueOf(direction));
-            } else {
-                snake.isIdle = true;
+            String directionInput = in.nextLine();
+            try {
+                Direction direction = Direction.valueOf(directionInput);
+                snake.setDirection(direction);
+                System.out.println("Received direction from client " + connection.getPort() + ": " + directionInput);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid direction received from client " + connection.getPort() + ".");
             }
         }
     }

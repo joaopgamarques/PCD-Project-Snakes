@@ -7,6 +7,10 @@ import environment.LocalBoard;
 
 import remote.Direction;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Class for a remote snake, controlled by a human.
  *
@@ -17,7 +21,9 @@ public class HumanSnake extends Snake {
     public HumanSnake(int id, Board board) {
         super(id, board);
     }
-    private Direction direction = Direction.RIGHT; // Default initial direction
+    private Direction direction; // Default initial direction
+    private final Lock lock = new ReentrantLock();
+    private final Condition newDirectionAvailable = lock.newCondition();
 
     // Retrieves the current movement direction of the snake.
     public Direction getDirection() {
@@ -26,7 +32,36 @@ public class HumanSnake extends Snake {
 
     // Sets the movement direction of the snake.
     public void setDirection(Direction direction) {
-        this.direction = direction;
+        lock.lock();
+        try {
+            this.direction = direction;
+            newDirectionAvailable.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // Retrieves the next cell for the snake to move to based on the current direction.
+    public Cell getNextCell() throws InterruptedException {
+        lock.lock();
+        try {
+            // Wait for a new direction to be set by the client.
+            while (direction == null) {
+                newDirectionAvailable.await();
+            }
+            // Determine the next position based on the current direction.
+            BoardPosition nextPosition = getHead().getPosition().directionalPosition(direction);
+            // If the snake is active and the next position is within the board, proceed with the move.
+            if (getBoard().isWithinBounds(nextPosition)) {
+                Cell nextCell = getBoard().getCell(nextPosition);
+                direction = null; // Reset the direction after obtaining the next cell.
+                return nextCell;
+            } else {
+                return null; // Return null if the next position is not within the board bounds or if the snake is idle.
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
     // Main execution method for the snake's movement. This method is continuously called during the game's execution.
@@ -46,11 +81,8 @@ public class HumanSnake extends Snake {
             try {
                 // Wait for a fixed interval before attempting the next move.
                 Thread.sleep(LocalBoard.PLAYER_PLAY_INTERVAL);
-                // Determine the next position based on the current direction.
-                BoardPosition nextPosition = cells.getLast().getPosition().directionalPosition(direction);
-                // If the snake is active and the next position is within the board, proceed with the move.
-                if (!isIdle && getBoard().isWithinBounds(nextPosition)) {
-                    Cell nextCell = getBoard().getCell(nextPosition);
+                Cell nextCell = getNextCell();
+                if (nextCell != null && !getBoard().isFinished()) {
                     move(nextCell);
                 }
             } catch (InterruptedException e) {

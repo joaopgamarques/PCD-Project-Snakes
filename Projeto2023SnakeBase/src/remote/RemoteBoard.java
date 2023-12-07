@@ -55,7 +55,6 @@ public class RemoteBoard extends Board {
 	@Override
 	public void handleKeyRelease() {
 		// TODO
-		client.getPrintWriter().println("Stop.");
 		client.getPrintWriter().flush();
 	}
 
