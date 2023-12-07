@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 
 import environment.GameState;
 
+import game.Goal;
 import gui.SnakeGui;
 
 /** Remore client, only for part II

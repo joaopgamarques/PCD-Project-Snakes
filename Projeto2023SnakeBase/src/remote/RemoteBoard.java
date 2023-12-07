@@ -1,7 +1,11 @@
 package remote;
 
 import environment.Board;
+import environment.BoardPosition;
+import environment.Cell;
 import environment.GameState;
+import game.Goal;
+
 import java.awt.event.KeyEvent;
 
 /** Remote representation of the game, no local threads involved.
@@ -14,14 +18,16 @@ import java.awt.event.KeyEvent;
 public class RemoteBoard extends Board {
 	private Client client;
 
+	// Client instance for communication with the server.
 	public void setClient(Client client) {
 		this.client = client;
-	} // Client instance for communication with the server.
+	}
 
 	// Sets the client instance used for communication with the server.
-	public void setChanged(GameState GameState) {
-		this.cells = GameState.getCells();
-		this.snakes = GameState.getSnakes();
+	public void setChanged(GameState gameState) {
+		this.cells = gameState.getCells();
+		this.snakes = gameState.getSnakes();
+		this.isFinished = gameState.isFinished();
 		super.setChanged();
 	}
 
@@ -56,6 +62,7 @@ public class RemoteBoard extends Board {
 	// Initialize the remote board. Additional setup can be added here if needed.
 	@Override
 	public void init() {
-		// TODO 		
+		// TODO
+		isFinished = false;
 	}
 }

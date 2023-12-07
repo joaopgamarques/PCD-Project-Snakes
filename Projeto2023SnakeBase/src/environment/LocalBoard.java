@@ -34,7 +34,7 @@ public class LocalBoard extends Board {
 
 	// Initializes the game by starting all snake threads and scheduling obstacle movers.
 	public void init() {
-		gameState = new GameState(cells, snakes); // Initialize the game state.
+		gameState = new GameState(cells, snakes, isFinished); // Initialize the game state.
 		for(Snake snake: snakes) {
 			snake.start();
 		}
@@ -48,7 +48,7 @@ public class LocalBoard extends Board {
 	@Override
 	public void setChanged() {
 		super.setChanged();
-		gameState.update(cells, snakes);
+		gameState.update(cells, snakes, isFinished);
 	}
 
 	// Marks the game as finished, triggering a graceful shutdown process. This method should be called when the game is to be concluded.
@@ -61,7 +61,7 @@ public class LocalBoard extends Board {
 			}
 		}
 		shutdownNow(); // Stop all obstacle movers.
-		gameState.update(cells, snakes);
+		gameState.update(cells, snakes, isFinished);
 	}
 
 	// Shuts down the thread pool immediately and interrupts all running tasks.

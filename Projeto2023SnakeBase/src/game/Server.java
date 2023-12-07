@@ -26,7 +26,7 @@ public class Server {
                     // Delay between broadcasts.
                     Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
                     // Get the current game state for broadcasting.
-                    GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
+                    GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes(), localBoard.isFinished());
                     HashMap<Integer, ConnectionHandler> copyOfConnections = new HashMap<>(connections);
                     System.out.println("Active connections: " + copyOfConnections.size());
                     // Broadcast the game state to each client.
@@ -50,7 +50,7 @@ public class Server {
         // Broadcasts the final game state to all clients.
         private void broadcastLastGameState() {
             // Get the current game state for broadcasting.
-            GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
+            GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes(), localBoard.isFinished());
             // Broadcast the game state to each client.
             HashMap<Integer, ConnectionHandler> connectionsCopy = new HashMap<>(connections);
             for (ConnectionHandler connection : connectionsCopy.values()) {

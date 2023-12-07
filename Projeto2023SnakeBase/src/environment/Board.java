@@ -12,8 +12,8 @@ public abstract class Board extends Observable {
 	public static final long REMOTE_CONNECTION_SETUP_DELAY = 10000; // Delay for setting up remote connections.
 	public static final int NUMBER_COLUMNS = 30; // Number of columns on the board.
 	public static final int NUMBER_ROWS = 30; // Number of rows on the board.
-	protected LinkedList<Snake> snakes = new LinkedList<Snake>(); // List of snakes present on the board.
-	private final LinkedList<Obstacle> obstacles = new LinkedList<Obstacle>(); // List of obstacles present on the board.
+	protected LinkedList<Snake> snakes = new LinkedList<>(); // List of snakes present on the board.
+	private final LinkedList<Obstacle> obstacles = new LinkedList<>(); // List of obstacles present on the board.
 	protected volatile boolean isFinished; // Flag indicating if the game is finished.
 
 	public Board() {
