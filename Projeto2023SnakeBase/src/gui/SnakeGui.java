@@ -49,7 +49,7 @@ public class SnakeGui implements Observer {
 		frame.add(boardGui,BorderLayout.CENTER);
 
 		// Button to reset directions of automatic snakes.
-		JButton resetObstaclesButton=new JButton("Reset snakes' directions");
+		JButton resetObstaclesButton = new JButton("Reset snakes' directions");
 		resetObstaclesButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -62,7 +62,12 @@ public class SnakeGui implements Observer {
 			}
 		});
 
-		frame.add(resetObstaclesButton,BorderLayout.SOUTH);
+		// Disable the button if the board is a RemoteBoard instance.
+		if (board instanceof RemoteBoard) {
+			resetObstaclesButton.setEnabled(false);
+		}
+
+		frame.add(resetObstaclesButton, BorderLayout.SOUTH);
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
