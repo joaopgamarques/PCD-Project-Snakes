@@ -1,6 +1,7 @@
 package environment;
 
 import java.io.Serializable;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,12 +13,13 @@ import game.*;
  * @author luismota
  *
  */
+
 public class Cell implements Serializable {
-	private final BoardPosition position;
-	private Snake occupyingSnake = null;
-	private GameElement gameElement = null;
-	private final Lock lock = new ReentrantLock();
-	private final Condition notOccupied = lock.newCondition();
+	private final BoardPosition position; // The position of this cell on the board.
+	private Snake occupyingSnake = null; // The snake currently occupying this cell, if any.
+	private GameElement gameElement = null; // Any game element (like goals or obstacles) present in this cell.
+	private final Lock lock = new ReentrantLock(); // Lock for handling concurrent access to the cell.
+	private final Condition notOccupied = lock.newCondition(); // Condition for signaling when the cell becomes unoccupied.
 
 	public GameElement getGameElement() {
 		return gameElement;
@@ -62,6 +64,7 @@ public class Cell implements Serializable {
 		}
 	}
 
+	// Check if the cell is occupied by a snake.
 	public boolean isOccupiedBySnake() {
 		return occupyingSnake != null;
 	}
@@ -84,10 +87,12 @@ public class Cell implements Serializable {
 		}
 	}
 
+	// Check if the cell is occupied by either a snake or an obstacle.
 	public boolean isOccupied() {
 		return isOccupiedBySnake() || (gameElement != null && gameElement instanceof Obstacle);
 	}
 
+	// Returns the snake occupying the cell, if any.
 	public Snake getOccupyingSnake() {
 		return occupyingSnake;
 	}
@@ -123,10 +128,12 @@ public class Cell implements Serializable {
 		}
 	}
 
+	// Return the goal if it is present in the cell.
 	public Goal getGoal() {
 		return (Goal)gameElement;
 	}
 
+	// Check if the cell is occupied by a goal.
 	public boolean isOcupiedByGoal() {
 		return (gameElement != null && gameElement instanceof Goal);
 	}

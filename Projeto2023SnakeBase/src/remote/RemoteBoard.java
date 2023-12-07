@@ -2,7 +2,6 @@ package remote;
 
 import environment.Board;
 import environment.GameState;
-
 import java.awt.event.KeyEvent;
 
 /** Remote representation of the game, no local threads involved.
@@ -17,18 +16,21 @@ public class RemoteBoard extends Board {
 
 	public void setClient(Client client) {
 		this.client = client;
-	}
+	} // Client instance for communication with the server.
 
+	// Sets the client instance used for communication with the server.
 	public void setChanged(GameState GameState) {
 		this.cells = GameState.getCells();
 		this.snakes = GameState.getSnakes();
 		super.setChanged();
 	}
 
+	// Handles key press events for remote control. Sends direction commands to the server.
 	@Override
 	public void handleKeyPress(int keyCode) {
 		//TODO
-		Direction direction = null;
+		Direction direction = null; // Variable to store the direction based on the key pressed.
+		// Determine the direction based on the key code.
 		switch (keyCode) {
 			case KeyEvent.VK_UP -> direction = Direction.UP;
 			case KeyEvent.VK_DOWN -> direction = Direction.DOWN;
@@ -43,12 +45,15 @@ public class RemoteBoard extends Board {
 		}
 	}
 
+	// Handles key release events. Sends a stop command to the server.
 	@Override
 	public void handleKeyRelease() {
 		// TODO
+		client.getPrintWriter().println("Stop.");
 		client.getPrintWriter().flush();
 	}
 
+	// Initialize the remote board. Additional setup can be added here if needed.
 	@Override
 	public void init() {
 		// TODO 		

@@ -5,15 +5,16 @@ import environment.Cell;
 import environment.LocalBoard;
 
 public class ObstacleMover extends Thread {
-	private final Obstacle obstacle;
-	private final LocalBoard board;
+	private final Obstacle obstacle; // The obstacle to be moved.
+	private final LocalBoard board; // The game board where the obstacle is located.
 
 	public ObstacleMover(Obstacle obstacle, LocalBoard board) {
 		this.obstacle = obstacle;
 		this.board = board;
 	}
 
-	// Movement logic for the obstacle, runs until game ends or moves are exhausted.
+	// Movement logic for the obstacle, runs until game ends or moves are exhausted. It continuously attempts to move
+	// the obstacle at regular intervals until the game ends or the obstacle has no remaining moves.
 	@Override
 	public void run() {
 		// TODO

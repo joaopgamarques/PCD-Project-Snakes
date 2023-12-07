@@ -1,26 +1,23 @@
 package environment;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import game.*;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import game.*;
 
 /** Class representing the state of a game running locally.
  * 
  * @author luismota
  *
  */
+
 public class LocalBoard extends Board {
-	private static final int NUM_SNAKES = 2;
-	private static final int NUM_OBSTACLES = 25;
-	public static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3;
+	private static final int NUM_SNAKES = 2; // Number of snakes in the game.
+	private static final int NUM_OBSTACLES = 25; // Number of obstacles on the board.
+	public static final int NUM_SIMULTANEOUS_MOVING_OBSTACLES = 3; // Number of obstacles that can move simultaneously.
 	private transient final ExecutorService obstacleMoverThreadPool; // ExecutorService to manage ObstacleMover threads.
-	private GameState gameState;
+	private GameState gameState; // Current state of the game, including all game elements.
 
 	public LocalBoard() {
 		// Initialize the thread pool with the fixed number of threads for moving obstacles.
@@ -30,14 +27,14 @@ public class LocalBoard extends Board {
 			AutomaticSnake snake = new AutomaticSnake(i, this);
 			snakes.add(snake);
 		}
-		addObstacles(NUM_OBSTACLES);
-		Goal goal = addGoal();
-		System.err.println("All game elements placed.");
+		addObstacles(NUM_OBSTACLES); // Add obstacles to the board.
+		Goal goal = addGoal(); // Add a goal to the board.
+		System.out.println("All game elements placed.");
 	}
 
 	// Initializes the game by starting all snake threads and scheduling obstacle movers.
 	public void init() {
-		gameState = new GameState(cells, snakes);
+		gameState = new GameState(cells, snakes); // Initialize the game state.
 		for(Snake snake: snakes) {
 			snake.start();
 		}
@@ -58,7 +55,11 @@ public class LocalBoard extends Board {
 	// All active game entities should periodically check the 'isFinished' flag and terminate their operations if it is set to true.
 	public void endGame() {
 		isFinished = true; // Signal all game entities that the game has ended.
-		snakes.forEach(snake -> snake.interrupt()); // Stop all snakes.
+		for (Snake snake : snakes) {
+			if (snake instanceof AutomaticSnake) {
+				snake.interrupt(); // Stop all snakes.
+			}
+		}
 		shutdownNow(); // Stop all obstacle movers.
 		gameState.update(cells, snakes);
 	}
@@ -81,6 +82,7 @@ public class LocalBoard extends Board {
 		obstacleMoverThreadPool.shutdown();
 	}
 
+	// Returns the current game state.
 	public GameState getGameState() {
 		return gameState;
 	}
@@ -95,13 +97,15 @@ public class LocalBoard extends Board {
 		return true;
 	}
 
+	// Implementation for handling key presses. Not relevant for local game.
 	@Override
 	public void handleKeyPress(int keyCode) {
-		// do nothing... No keys relevant in local game
+		// Do nothing... No keys relevant in local game.
 	}
 
+	// Implementation for handling key releases. Not relevant for local game.
 	@Override
 	public void handleKeyRelease() {
-		// do nothing... No keys relevant in local game
+		// Do nothing... No keys relevant in local game.
 	}
 }

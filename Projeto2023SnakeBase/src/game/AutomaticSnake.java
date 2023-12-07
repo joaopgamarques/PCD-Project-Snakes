@@ -1,17 +1,16 @@
 package game;
 
-import java.awt.*;
+import environment.Board;
+import environment.BoardPosition;
+import environment.Cell;
+import environment.LocalBoard;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import environment.Board;
-import environment.LocalBoard;
-import environment.Cell;
-import environment.BoardPosition;
-
 public class AutomaticSnake extends Snake {
-	private Boolean isInterruptedByUser = false;
+	private Boolean isInterruptedByUser = false; // Flag to determine if the snake's direction was manually set.
 
 	public AutomaticSnake(int id, LocalBoard board) {
 		super(id, board);
@@ -20,11 +19,12 @@ public class AutomaticSnake extends Snake {
 	// The main run method that dictates the automatic movement of the snake.
 	@Override
 	public void run() {
-		doInitialPositioning();
-		System.err.println("initial size:" + cells.size());
+		doInitialPositioning(); // Determine the initial position of the snake on the board.
+		System.out.println("initial size:" + cells.size());
 		// TODO: automatic movement.
 		System.out.println(Thread.currentThread().getName() + ": Started.");
 
+		// Delay before starting the automatic movement.
 		try {
 			Thread.sleep(Board.REMOTE_CONNECTION_SETUP_DELAY);
 		} catch (InterruptedException e) {
@@ -88,9 +88,8 @@ public class AutomaticSnake extends Snake {
 
 	// Chooses the neighboring position that is closest to the goal.
 	private BoardPosition getNextPositionTowardsGoal() {
-		Cell head = cells.getLast();
-		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(head);
-		BoardPosition nextPosition =  head.getPosition();
+		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(getHead());
+		BoardPosition nextPosition =  getHead().getPosition();
 		double minimumDistanceToGoal = Double.MAX_VALUE;
 
 		for (BoardPosition neighbor : neighboringPositions) {
@@ -108,19 +107,17 @@ public class AutomaticSnake extends Snake {
 
 	// Gets a random unoccupied neighboring position.
 	private BoardPosition getRandomPosition() {
-		Cell head = cells.getLast();
-		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(head);
+		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(getHead());
 		neighboringPositions.removeIf(position -> getBoard().getCell(position).isOccupied());
 		if (neighboringPositions.isEmpty()) {
-			return head.getPosition();
+			return getHead().getPosition();
 		}
 		return neighboringPositions.get(new Random().nextInt(neighboringPositions.size()));
 	}
 
 	// Check if all neighboring positions are occupied by the snake or an immovable obstacle.
 	public boolean isTrapped() {
-		Cell head = cells.getLast();
-		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(head);
+		List<BoardPosition> neighboringPositions = getBoard().getNeighboringPositions(getHead());
 		for (BoardPosition position : neighboringPositions) {
 			Cell neighbor = getBoard().getCell(position);
 			if (!isPositionOccupiedBySnake(position) && !(neighbor.getGameElement() instanceof Obstacle &&

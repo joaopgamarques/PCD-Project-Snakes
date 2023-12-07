@@ -3,44 +3,59 @@ package game;
 import environment.Board;
 import environment.GameState;
 import environment.LocalBoard;
-
+import remote.Direction;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 
 public class Server {
     // TODO
     private ServerSocket server; // ServerSocket to listen for incoming connections.
     private final LocalBoard localBoard; // The local board that maintains the game state.
-    private final Map<Integer, ConnectionHandler> connections = new HashMap<>();
+    private final Map<Integer, ConnectionHandler> connections = new HashMap<>(); // Maps client ports to their respective connection handlers.
 
     // Thread for broadcasting game state updates to all active clients.
-    private final Thread multicastThread = new Thread(new Runnable() {
+    private final Thread broadcastThread = new Thread(new Runnable() {
         @Override
         public void run() {
             while (!localBoard.isFinished()) {
                 try {
                     // Delay between broadcasts.
                     Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
-                    synchronized (connections) {
-                        System.out.println("Active connections: " + connections.size());
-                        // Get the current game state for broadcasting.
-                        GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
-                        // Broadcast the game state to each client.
-                        for (ConnectionHandler connection : connections.values()) {
-                            if (!connection.connection.isClosed()) {
-                                connection.multicastGameState(gameState);
-                            }
+                    // Get the current game state for broadcasting.
+                    GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
+                    HashMap<Integer, ConnectionHandler> copyOfConnections = new HashMap<>(connections);
+                    System.out.println("Active connections: " + copyOfConnections.size());
+                    // Broadcast the game state to each client.
+                    for (ConnectionHandler connection : copyOfConnections.values()) {
+                        if (!connection.connection.isClosed() && connection.isOutputStreamInitialized) {
+                            connection.broadcastGameState(gameState);
                         }
                     }
                 } catch (InterruptedException e) {
-                    System.out.println("MulticastThread interrupted: " + e.getMessage() + ".");
+                    System.out.println("BroadcastThread interrupted: " + e.getMessage() + ".");
+                }
+            }
+            try {
+                Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
+                broadcastLastGameState(); // Broadcast the final game state at the end.
+            } catch (InterruptedException e) {
+                System.out.println("BroadcastThread interrupted: " + e.getMessage() + ".");
+            }
+        }
+
+        // Broadcasts the final game state to all clients.
+        private void broadcastLastGameState() {
+            // Get the current game state for broadcasting.
+            GameState gameState = new GameState(localBoard.getCells(), localBoard.getSnakes());
+            // Broadcast the game state to each client.
+            HashMap<Integer, ConnectionHandler> connectionsCopy = new HashMap<>(connections);
+            for (ConnectionHandler connection : connectionsCopy.values()) {
+                if (!connection.connection.isClosed() && connection.isOutputStreamInitialized) {
+                    connection.broadcastGameState(gameState);
                 }
             }
         }
@@ -54,18 +69,17 @@ public class Server {
     public void run() {
         try {
             server = new ServerSocket(12345); // Create a server socket bound to port 12345.
-            multicastThread.start(); // Start multicasting.
+            broadcastThread.start(); // Start multicasting.
             System.out.println("The server is running.");
-            // Continuously listen for client connections as long as the server is not closed.
-            while (!server.isClosed()) {
+            while (!server.isClosed()) { // Continuously listen for client connections as long as the server is not closed.
                 try {
                     waitForConnection();
                 } catch (IOException e) {
-                    System.out.println("Exception handling client connection: " + e.getMessage() + ".");
+                    System.err.println("Exception handling client connection: " + e.getMessage() + ".");
                 }
             }
         } catch (IOException e) {
-            System.out.println("Could not start server: " + e.getMessage() + ".");
+            System.err.println("Could not start server: " + e.getMessage() + ".");
         }
     }
 
@@ -84,6 +98,8 @@ public class Server {
         private ObjectOutputStream out; // Stream for sending data to the client.
         private Scanner in; // Stream for receiving data from the client.
         private final HumanSnake snake; // Represents the snake controlled by the client connected through this handler.
+        private volatile boolean isInputStreamInitialized = false;
+        private volatile boolean isOutputStreamInitialized = false;
 
         public ConnectionHandler(Socket connection) {
             this.connection = connection;
@@ -94,11 +110,25 @@ public class Server {
             }
         }
 
+        // Checks if input and output streams are initialized.
+        public boolean isInputStreamInitialized() {
+            return isInputStreamInitialized;
+        }
+
+        public boolean isOutputStreamInitialized() {
+            return isOutputStreamInitialized;
+        }
+
         // Adds a new HumanSnake to the game when a client connection is established.
         private void addSnake(HumanSnake snake) {
-            localBoard.addSnake(snake); // Add the snake to the local board.
-            localBoard.setChanged();
-            snake.start(); // Start the snake's movement and logic.
+            try {
+                localBoard.addSnake(snake); // Add the snake to the local board.
+                snake.start(); // Start the snake's movement and logic.
+                Thread.sleep(Board.REMOTE_REFRESH_INTERVAL);
+                localBoard.setChanged();
+            } catch (InterruptedException e) {
+                System.out.println("Thread interrupted: " + e.getMessage());
+            }
         }
 
         // Removes the associated HumanSnake from the game.
@@ -112,13 +142,15 @@ public class Server {
         public void run() {
             try {
                 getStreams();
+                isInputStreamInitialized = true;
+                isOutputStreamInitialized = true;
                 while (!connection.isClosed()) {
                     processConnection();
                 }
             } catch (SocketException e) {
-                System.out.println("Connection closed by server.");
+                System.err.println("Connection closed by server.");
             } catch (IOException e) {
-                System.out.println("Exception in ConnectionHandler: " + e.getMessage() + ".");
+                System.err.println("Exception in ConnectionHandler: " + e.getMessage() + ".");
             } finally {
                 closeConnection(); // Close the connection when done.
             }
@@ -130,25 +162,11 @@ public class Server {
             in = new Scanner(connection.getInputStream()); // Input stream.
         }
 
-        // Sends the updated game state to the clients.
-        public void multicastGameState(GameState gameState) {
-            try {
-                out.reset(); // Reset the ObjectOutputStream to ensure no stale objects are sent.
-                out.writeObject(gameState); // Send the game state to the client.
-                out.flush(); // Flush the stream to ensure the data is sent.
-                System.out.println("Sending the game state to client " + connection.getPort() + ".");
-            } catch (IOException e) {
-                System.out.println("Error sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
-            }
-        }
-
         // Handles communication with the client.
         private void processConnection() throws IOException {
             try {
                 if (in.hasNextLine()) {
-                    String command = in.nextLine();
-                    System.out.println("Received command from client " + connection.getPort() + ": " + command);
-                    // Process command here...
+                    processClientInput();
                 } else {
                     throw new IOException("Client " + connection.getPort() + " connection might be closed");
                 }
@@ -165,11 +183,39 @@ public class Server {
             try {
                 if (out != null) out.close(); // Close the output stream.
                 if (in != null) in.close(); // Close the input stream.
-                if (connection != null && !connection.isClosed()) connection.close();
+                if (!connection.isClosed()) connection.close();
             } catch (IOException e) {
-                System.out.println("Exception on closing connection: " + e.getMessage() + ".");
+                System.err.println("Exception on closing connection: " + e.getMessage() + ".");
             } finally {
                 removeSnake();
+            }
+        }
+
+        // Sends the updated game state to the clients.
+        public void broadcastGameState(GameState gameState) {
+            if (out == null) {
+                System.err.println("Output stream not initialized for client " + connection.getPort() + ".");
+                return;
+            }
+            try {
+                out.reset(); // Reset the ObjectOutputStream to ensure no stale objects are sent.
+                out.writeObject(gameState); // Send the game state to the client.
+                out.flush(); // Flush the stream to ensure the data is sent.
+                System.out.println("Sending the game state to client " + connection.getPort() + ".");
+            } catch (IOException e) {
+                System.err.println("Error sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
+            }
+        }
+
+        // Processes incoming commands from the client.
+        private void processClientInput() throws IOException {
+            String direction = in.nextLine();
+            System.out.println("Received command from client " + connection.getPort() + ": " + direction);
+            if (!direction.equals("Stop.") && Direction.isDirection(direction)) {
+                snake.isIdle = false;
+                snake.setDirection(Direction.valueOf(direction));
+            } else {
+                snake.isIdle = true;
             }
         }
     }

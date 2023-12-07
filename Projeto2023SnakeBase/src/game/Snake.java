@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import environment.Board;
 import environment.BoardPosition;
 import environment.Cell;
-import environment.LocalBoard;
 
 /** Base class for representing Snakes.
  * Will be extended by HumanSnake and AutomaticSnake.
@@ -43,6 +42,10 @@ public abstract class Snake extends Thread implements Serializable {
 	public int getLength() {
 		return cells.size();
 	}
+
+	public Cell getHead() {
+		return getCells().getLast();
+	}
 	
 	public LinkedList<Cell> getCells() {
 		return cells;
@@ -56,6 +59,8 @@ public abstract class Snake extends Thread implements Serializable {
 	// Moves the snake to a new cell and handles any interaction with goals.
 	protected void move(Cell cell) throws InterruptedException {
 		// TODO
+		// Abort the move if the cell is already occupied (Human Snake).
+		if (this instanceof HumanSnake && cell.isOccupied()) return;
 		// Request access to the cell for the snake.
 		cell.request(this);
 		// Add the cell to the snake's path.
@@ -101,10 +106,10 @@ public abstract class Snake extends Thread implements Serializable {
 	protected void doInitialPositioning() {
 		// Random position on the first column. At startup, the snake occupies a single cell.
 		int x = 0;
-		int y = (int) (Math.random() * Board.NUM_ROWS);
+		int y = (int) (Math.random() * Board.NUMBER_ROWS);
 		BoardPosition at = new BoardPosition(x, y);
 		while (board.getCell(at).isOccupied()) {
-			y = (int) (Math.random() * Board.NUM_ROWS);
+			y = (int) (Math.random() * Board.NUMBER_ROWS);
 			at = new BoardPosition(x, y);
 		}
 		try {
@@ -113,6 +118,6 @@ public abstract class Snake extends Thread implements Serializable {
 			System.out.println(currentThread().getName() + ": Interrupted.");
 		}
 		cells.add(board.getCell(at));
-		System.err.println("Snake "+ getIdentification() + " starting at:" + getCells().getLast());
+		System.out.println("Snake "+ getIdentification() + " starting at: " + getHead().getPosition());
 	}
 }
