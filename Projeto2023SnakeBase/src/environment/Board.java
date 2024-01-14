@@ -37,7 +37,7 @@ public abstract class Board extends Observable {
 
 	// Generates a random position within the board's bounds.
 	protected BoardPosition getRandomPosition() {
-		return new BoardPosition((int) (Math.random() * NUMBER_ROWS),(int) (Math.random() * NUMBER_ROWS));
+		return new BoardPosition((int) (Math.random() * NUMBER_COLUMNS),(int) (Math.random() * NUMBER_ROWS));
 	}
 
 	// Returns a list of neighboring positions around a given cell.

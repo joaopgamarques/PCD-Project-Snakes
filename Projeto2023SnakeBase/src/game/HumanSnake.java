@@ -18,12 +18,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 public class HumanSnake extends Snake {
+    private Direction direction;
+    private final Lock lock = new ReentrantLock();
+    private final Condition newDirectionAvailable = lock.newCondition();
+
     public HumanSnake(int id, Board board) {
         super(id, board);
     }
-    private Direction direction; // Default initial direction
-    private final Lock lock = new ReentrantLock();
-    private final Condition newDirectionAvailable = lock.newCondition();
 
     // Retrieves the current movement direction of the snake.
     public Direction getDirection() {

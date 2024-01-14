@@ -1,6 +1,6 @@
 package environment;
 
-/** Classe representing a position on the board, with some utilities
+/** Classe representing a position on the board, with some utilities.
  * 
  * @author luismota
  *
@@ -28,7 +28,7 @@ public class BoardPosition implements Serializable, Comparable<BoardPosition> {
 	@Override
 	public boolean equals(Object obj) {
 		BoardPosition other = (BoardPosition) obj;
-		return other.x == x && other.y == y;
+		return other.x == this.x && other.y == this.y;
 	}
 
 	// Allows BoardPosition to be compared, first by x-coordinate, then by y-coordinate.
@@ -42,8 +42,8 @@ public class BoardPosition implements Serializable, Comparable<BoardPosition> {
 
 	// Calculates the Euclidean distance to another BoardPosition.
 	public double distanceTo(BoardPosition other) {
-		double delta_x = x - other.x;
-		double delta_y = y - other.y;
+		double delta_x = this.x - other.x;
+		double delta_y = this.y - other.y;
 		return Math.sqrt(delta_x * delta_x + delta_y * delta_y);
 	}
 
