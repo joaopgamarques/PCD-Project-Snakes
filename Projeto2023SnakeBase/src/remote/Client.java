@@ -39,7 +39,7 @@ public class Client {
 	}
 
 	// Runs the client to connect to the server and update the game state.
-	public void run() {
+	public void runClient() {
 		try {
 			connectToServer(); // Establish a connection to the server.
 			getStreams(); // Setup I/O streams.
@@ -104,6 +104,6 @@ public class Client {
 		Client client = new Client(InetAddress.getByName("localhost"), 12345, board);
 		// Starts the client's operation, which involves connecting to the server, receiving game state updates,
 		// and updating the remote board accordingly.
-		client.run();
+		client.runClient();
 	}
 }
