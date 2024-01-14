@@ -101,12 +101,12 @@ public class Server {
         private volatile boolean isInputStreamInitialized = false;
         private volatile boolean isOutputStreamInitialized = false;
 
-        public ConnectionHandler(Socket connection) {
-            this.socket = connection;
-            this.snake = new HumanSnake(connection.getPort(), localBoard);
+        public ConnectionHandler(Socket socket) {
+            this.socket = socket;
+            this.snake = new HumanSnake(socket.getPort(), localBoard);
             addSnake(snake);
             synchronized (connections) {
-                connections.put(connection.getPort(), this); // Add this connection handler to the map.
+                connections.put(socket.getPort(), this); // Add this connection handler to the map.
             }
         }
 
