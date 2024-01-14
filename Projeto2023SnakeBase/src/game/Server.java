@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Server {
     // TODO
-    private ServerSocket server; // ServerSocket to listen for incoming connections.
+    private ServerSocket serverSocket; // ServerSocket to listen for incoming connections.
     private final LocalBoard localBoard; // The local board that maintains the game state.
     private final Map<Integer, ConnectionHandler> connections = new HashMap<>(); // Maps client ports to their respective connection handlers.
 
@@ -31,7 +31,7 @@ public class Server {
                     System.out.println("Active connections: " + copyOfConnections.size());
                     // Broadcast the game state to each client.
                     for (ConnectionHandler connection : copyOfConnections.values()) {
-                        if (!connection.connection.isClosed() && connection.isOutputStreamInitialized) {
+                        if (!connection.socket.isClosed() && connection.isOutputStreamInitialized) {
                             connection.broadcastGameState(gameState);
                         }
                     }
@@ -54,7 +54,7 @@ public class Server {
             // Broadcast the game state to each client.
             HashMap<Integer, ConnectionHandler> connectionsCopy = new HashMap<>(connections);
             for (ConnectionHandler connection : connectionsCopy.values()) {
-                if (!connection.connection.isClosed() && connection.isOutputStreamInitialized) {
+                if (!connection.socket.isClosed() && connection.isOutputStreamInitialized) {
                     connection.broadcastGameState(gameState);
                 }
             }
@@ -66,12 +66,12 @@ public class Server {
     }
 
     // Starts the server and listens for incoming client connections.
-    public void run() {
+    public void runServer() {
         try {
-            server = new ServerSocket(12345); // Create a server socket bound to port 12345.
+            serverSocket = new ServerSocket(12345); // Create a server socket bound to port 12345.
             broadcastThread.start(); // Start multicasting.
             System.out.println("The server is running.");
-            while (!server.isClosed()) { // Continuously listen for client connections as long as the server is not closed.
+            while (!serverSocket.isClosed()) { // Continuously listen for client connections as long as the server is not closed.
                 try {
                     waitForConnection();
                 } catch (IOException e) {
@@ -86,15 +86,15 @@ public class Server {
     // Waits for a client to connect and creates a handler to manage the connection.
     private void waitForConnection() throws IOException {
         System.out.println("Waiting for connection.");
-        Socket connection = server.accept(); // Accept the incoming connection.
-        ConnectionHandler connectionHandler = new ConnectionHandler(connection);
+        Socket socket = serverSocket.accept(); // Accept the incoming connection.
+        ConnectionHandler connectionHandler = new ConnectionHandler(socket);
         connectionHandler.start(); // Start the thread to process the connection.
-        System.out.println("New connection to client " + connection.getPort() + ". " + connection.getInetAddress().getHostAddress());
+        System.out.println("New connection to client " + socket.getPort() + ". " + socket.getInetAddress().getHostAddress());
     }
 
     // Inner class to handle client connections.
     private class ConnectionHandler extends Thread {
-        private final Socket connection; // Socket representing the client connection.
+        private final Socket socket; // Socket representing the client connection.
         private ObjectOutputStream out; // Stream for sending data to the client.
         private Scanner in; // Stream for receiving data from the client.
         private final HumanSnake snake; // Represents the snake controlled by the client connected through this handler.
@@ -102,7 +102,7 @@ public class Server {
         private volatile boolean isOutputStreamInitialized = false;
 
         public ConnectionHandler(Socket connection) {
-            this.connection = connection;
+            this.socket = connection;
             this.snake = new HumanSnake(connection.getPort(), localBoard);
             addSnake(snake);
             synchronized (connections) {
@@ -144,7 +144,7 @@ public class Server {
                 getStreams();
                 isInputStreamInitialized = true;
                 isOutputStreamInitialized = true;
-                while (!connection.isClosed()) {
+                while (!socket.isClosed()) {
                     processConnection();
                 }
             } catch (SocketException e) {
@@ -158,8 +158,8 @@ public class Server {
 
         // Sets up the I/O streams for communication with the client.
         private void getStreams() throws IOException {
-            out = new ObjectOutputStream(connection.getOutputStream()); // Output stream.
-            in = new Scanner(connection.getInputStream()); // Input stream.
+            out = new ObjectOutputStream(socket.getOutputStream()); // Output stream.
+            in = new Scanner(socket.getInputStream()); // Input stream.
         }
 
         // Handles communication with the client.
@@ -169,7 +169,7 @@ public class Server {
                     processClientInput();
                 }
             } catch (SocketException e) {
-                System.err.println("Client " + connection.getPort() + " disconnected.");
+                System.err.println("Client " + socket.getPort() + " disconnected.");
             } catch (IOException e) {
                 System.err.println("IO Exception in ConnectionHandler: " + e.getMessage());
             }
@@ -178,12 +178,12 @@ public class Server {
         // Closes the client connection and associated streams.
         private void closeConnection() {
             synchronized (connections) {
-                connections.remove(connection.getPort()); // Remove this connection handler from the map.
+                connections.remove(socket.getPort()); // Remove this connection handler from the map.
             }
             try {
                 if (out != null) out.close(); // Close the output stream.
                 if (in != null) in.close(); // Close the input stream.
-                if (!connection.isClosed()) connection.close();
+                if (!socket.isClosed()) socket.close();
             } catch (IOException e) {
                 System.err.println("Exception on closing connection: " + e.getMessage() + ".");
             } finally {
@@ -194,16 +194,16 @@ public class Server {
         // Sends the updated game state to the clients.
         public void broadcastGameState(GameState gameState) {
             if (out == null) {
-                System.err.println("Output stream not initialized for client " + connection.getPort() + ".");
+                System.err.println("Output stream not initialized for client " + socket.getPort() + ".");
                 return;
             }
             try {
                 out.reset(); // Reset the ObjectOutputStream to ensure no stale objects are sent.
                 out.writeObject(gameState); // Send the game state to the client.
                 out.flush(); // Flush the stream to ensure the data is sent.
-                System.out.println("Sending the game state to client " + connection.getPort() + ".");
+                System.out.println("Sending the game state to client " + socket.getPort() + ".");
             } catch (IOException e) {
-                System.err.println("Exception on sending game state to client " + connection.getPort() + ". " + e.getMessage() + ".");
+                System.err.println("Exception on sending game state to client " + socket.getPort() + ". " + e.getMessage() + ".");
                 closeConnection(); // Close the connection if an error occurs while broadcasting.
             }
         }
@@ -214,9 +214,9 @@ public class Server {
             try {
                 Direction direction = Direction.valueOf(directionInput);
                 snake.setDirection(direction);
-                System.out.println("Received direction from client " + connection.getPort() + ": " + directionInput);
+                System.out.println("Received direction from client " + socket.getPort() + ": " + directionInput);
             } catch (IllegalArgumentException e) {
-                System.err.println("Invalid direction received from client " + connection.getPort() + ".");
+                System.err.println("Invalid direction received from client " + socket.getPort() + ".");
             }
         }
     }

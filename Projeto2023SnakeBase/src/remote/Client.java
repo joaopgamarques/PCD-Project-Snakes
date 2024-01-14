@@ -20,7 +20,7 @@ import gui.SnakeGui;
  */
 
 public class Client {
-	private Socket connection; // Client socket for communicating with the server.
+	private Socket socket; // Client socket for communicating with the server.
 	private final InetAddress server; // IP address of the server.
 	private final int port; // Port number of the server.
 	private ObjectInputStream in; // Stream for receiving data from the server.
@@ -44,7 +44,7 @@ public class Client {
 			connectToServer(); // Establish a connection to the server.
 			getStreams(); // Setup I/O streams.
 			// Continuously process game updates from the server.
-			while (!connection.isClosed()) {
+			while (!socket.isClosed()) {
 				processConnection(); // Process the incoming game state.
 			}
 		} catch (SocketException e) {
@@ -58,14 +58,14 @@ public class Client {
 
 	// Establishes a connection to the server.
 	private void connectToServer() throws IOException {
-		connection = new Socket(server, port);
+		socket = new Socket(server, port);
 		System.out.println("Connected to server at " + server + ".");
 	}
 
 	// Sets up the I/O streams for communication with the server.
 	private void getStreams() throws IOException {
-		in = new ObjectInputStream(connection.getInputStream()); // Input stream.
-		out = new PrintWriter(connection.getOutputStream(), true); // Output stream.
+		in = new ObjectInputStream(socket.getInputStream()); // Input stream.
+		out = new PrintWriter(socket.getOutputStream(), true); // Output stream.
 	}
 
 	// Handles communication with the server.
@@ -84,7 +84,7 @@ public class Client {
 		try {
 			if (in != null) in.close(); // Close the input stream.
 			if (out != null) out.close(); // Close the output stream.
-			if (connection != null) connection.close();
+			if (socket != null) socket.close();
 			System.out.println("Connection closed.");
 		} catch (IOException e) {
 			System.err.println("Error on closing connection: " + e.getMessage() + ".");

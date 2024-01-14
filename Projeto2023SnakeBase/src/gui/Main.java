@@ -12,6 +12,6 @@ public class Main {
 		// TODO
 		// Create and launch the server to handle remote connections. The server uses the same local board as the GUI.
 		Server server = new Server(board);
-		server.run(); // Start the server to listen for incoming client connections.
+		server.runServer(); // Start the server to listen for incoming client connections.
 	}
 }
