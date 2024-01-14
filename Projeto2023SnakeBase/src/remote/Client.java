@@ -21,14 +21,14 @@ import gui.SnakeGui;
 
 public class Client {
 	private Socket socket; // Client socket for communicating with the server.
-	private final InetAddress server; // IP address of the server.
+	private final InetAddress address; // IP address of the server.
 	private final int port; // Port number of the server.
 	private ObjectInputStream in; // Stream for receiving data from the server.
 	private PrintWriter out; // Stream for sending data to the server.
 	private final RemoteBoard remoteBoard; // Remote board that will reflect the game state from the server.
 
-	public Client(InetAddress server, int port, RemoteBoard remoteBoard) {
-		this.server = server;
+	public Client(InetAddress address, int port, RemoteBoard remoteBoard) {
+		this.address = address;
 		this.port = port;
 		this.remoteBoard = remoteBoard;
 		remoteBoard.setClient(this);
@@ -58,8 +58,8 @@ public class Client {
 
 	// Establishes a connection to the server.
 	private void connectToServer() throws IOException {
-		socket = new Socket(server, port);
-		System.out.println("Connected to server at " + server + ".");
+		socket = new Socket(address, port);
+		System.out.println("Connected to server at " + address + ".");
 	}
 
 	// Sets up the I/O streams for communication with the server.
