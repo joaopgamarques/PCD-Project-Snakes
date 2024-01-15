@@ -36,7 +36,7 @@ public class HumanSnake extends Snake {
         lock.lock();
         try {
             this.direction = direction;
-            newDirectionAvailable.signal();
+            newDirectionAvailable.signalAll();
         } finally {
             lock.unlock();
         }
