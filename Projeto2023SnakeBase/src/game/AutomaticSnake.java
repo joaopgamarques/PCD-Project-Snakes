@@ -130,7 +130,6 @@ public class AutomaticSnake extends Snake {
 
 	// Checks if the given position is currently occupied by a segment of the snake.
 	private boolean isPositionOccupiedBySnake(BoardPosition position) {
-		LinkedList<BoardPosition> path = getPath();
-		return path.contains(position);
+		return getPath().contains(position);
 	}
 }
