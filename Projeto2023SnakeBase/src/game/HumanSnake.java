@@ -58,6 +58,7 @@ public class HumanSnake extends Snake {
                 direction = null; // Reset the direction after obtaining the next cell.
                 return nextCell;
             } else {
+                direction = null;
                 return null; // Return null if the next position is not within the board bounds or if the snake is idle.
             }
         } finally {
