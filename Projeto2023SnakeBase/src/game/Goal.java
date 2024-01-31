@@ -31,7 +31,7 @@ public class Goal extends GameElement  {
 	}
 
 	// Increments the value of the goal by one, up to a maximum value.
-	public void incrementValue() throws InterruptedException {
+	public void incrementValue() {
 		// TODO
 		if (value < MAX_VALUE) {
 			value++;

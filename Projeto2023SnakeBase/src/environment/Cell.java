@@ -134,12 +134,12 @@ public class Cell implements Serializable {
 	}
 
 	// Check if the cell is occupied by a goal.
-	public boolean isOcupiedByGoal() {
+	public boolean isOccupiedByGoal() {
 		return (gameElement != null && gameElement instanceof Goal);
 	}
 
 	// Moves the goal from one cell to another in a thread-safe manner.
-	public static void goalCaptureAndMoveHandler(Board board) throws InterruptedException {
+	public static void goalCaptureAndMoveHandler(Board board) {
 		Lock firstLock, secondLock;
 
 		// Retrieve the current position of the goal.

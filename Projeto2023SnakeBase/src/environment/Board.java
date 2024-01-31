@@ -70,7 +70,7 @@ public abstract class Board extends Observable {
 		boolean placed = false;
 		while(!placed) {
 			BoardPosition position = getRandomPosition();
-			if(!getCell(position).isOccupied() && !getCell(position).isOcupiedByGoal()) {
+			if(!getCell(position).isOccupied() && !getCell(position).isOccupiedByGoal()) {
 				getCell(position).setGameElement(gameElement);
 				gameElement.setCurrentPosition(position);
 				if(gameElement instanceof Goal) {
@@ -137,7 +137,7 @@ public abstract class Board extends Observable {
 		// Continuously searches for an unoccupied position on the board.
 		while(true) {
 			BoardPosition position = getRandomPosition();
-			if(!getCell(position).isOccupied() && !getCell(position).isOcupiedByGoal()) {
+			if(!getCell(position).isOccupied() && !getCell(position).isOccupiedByGoal()) {
 				return position;
 			}
 		}

@@ -67,7 +67,7 @@ public abstract class Snake extends Thread implements Serializable {
 		getCells().addLast(cell);
 
 		// Check if the cell contains a goal.
-		if (cell.isOcupiedByGoal()) {
+		if (cell.isOccupiedByGoal()) {
 			// Increment the growth pending for the snake as it captures the goal.
 			Goal goal = (Goal)cell.getGameElement();
 			increaseGrowthPending(goal.captureGoal());
