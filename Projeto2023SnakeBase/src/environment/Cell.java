@@ -229,7 +229,6 @@ public class Cell implements Serializable {
 					nextCell.setGameElement(obstacle);
 					// Once the obstacle has been moved, decrement its remaining moves count.
 					obstacle.decrementRemainingMoves();
-					// hasObstacleMovedSucessfully = true;
 				}
 			} finally {
 				// Ensure the second lock is released.
