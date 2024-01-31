@@ -140,59 +140,54 @@ public class Cell implements Serializable {
 
 	// Moves the goal from one cell to another in a thread-safe manner.
 	public static void goalCaptureAndMoveHandler(Board board) throws InterruptedException {
-		boolean hasGoalMovedSucessfully = false;
+		Lock firstLock, secondLock;
 
-		while (!Thread.currentThread().isInterrupted() && !hasGoalMovedSucessfully) {
-			Lock firstLock, secondLock;
+		// Retrieve the current position of the goal.
+		BoardPosition currentPosition = board.getGoalPosition();
+		// Obtain the cell object for the current position.
+		Cell currentCell = board.getCell(currentPosition);
+		// Find a new unoccupied position for the goal.
+		BoardPosition nextPosition = board.getUnoccupiedPosition();
+		// Obtain the cell object for the next position.
+		Cell nextCell = board.getCell(nextPosition);
 
-			// Retrieve the current position of the goal.
-			BoardPosition currentPosition = board.getGoalPosition();
-			// Obtain the cell object for the current position.
-			Cell currentCell = board.getCell(currentPosition);
-			// Find a new unoccupied position for the goal.
-			BoardPosition nextPosition = board.getUnoccupiedPosition();
-			// Obtain the cell object for the next position.
-			Cell nextCell = board.getCell(nextPosition);
+		// Determine the order of locks based on the positions of the cells to avoid deadlocks.
+		// Locks are always acquired in a consistent global order.
+		if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
+			firstLock = currentCell.getLock();
+			secondLock = nextCell.getLock();
+		} else {
+			firstLock = nextCell.getLock();
+			secondLock = currentCell.getLock();
+		}
 
-			// Determine the order of locks based on the positions of the cells to avoid deadlocks.
-			// Locks are always acquired in a consistent global order.
-			if (currentCell.getPosition().compareTo(nextCell.getPosition()) < 0) {
-				firstLock = currentCell.getLock();
-				secondLock = nextCell.getLock();
-			} else {
-				firstLock = nextCell.getLock();
-				secondLock = currentCell.getLock();
-			}
-
-			// Acquire the first lock.
-			firstLock.lock();
+		// Acquire the first lock.
+		firstLock.lock();
+		try {
+			// Acquire the second lock.
+			secondLock.lock();
 			try {
-				// Acquire the second lock.
-				secondLock.lock();
-				try {
-					if (!nextCell.isOccupied()) {
-						// Remove the goal from the current cell.
-						Goal goal = currentCell.removeGoal();
-						// Increment the goal's value and check for game termination.
-						goal.incrementValue();
-						if (goal.getValue() == Goal.MAX_VALUE) {
-							((LocalBoard) board).endGame();
-							return;
-						}
-						// Set the goal in its new position and update the board's goal position.
-						nextCell.setGameElement(goal);
-						board.setGoalPosition(nextPosition);
-						System.out.println("Goal " + goal.getValue() + " placed at position " + goal.getCurrentPosition() + " .");
-						hasGoalMovedSucessfully = true;
+				if (!nextCell.isOccupied()) {
+					// Remove the goal from the current cell.
+					Goal goal = currentCell.removeGoal();
+					// Increment the goal's value and check for game termination.
+					goal.incrementValue();
+					if (goal.getValue() == Goal.MAX_VALUE) {
+						((LocalBoard) board).endGame();
+						return;
 					}
-				} finally {
-					// Release the second lock.
-					secondLock.unlock();
+					// Set the goal in its new position and update the board's goal position.
+					nextCell.setGameElement(goal);
+					board.setGoalPosition(nextPosition);
+					System.out.println("Goal " + goal.getValue() + " placed at position " + goal.getCurrentPosition() + " .");
 				}
 			} finally {
-				// Release the first lock.
-				firstLock.unlock();
+				// Release the second lock.
+				secondLock.unlock();
 			}
+		} finally {
+			// Release the first lock.
+			firstLock.unlock();
 		}
 	}
 
