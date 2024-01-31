@@ -46,11 +46,11 @@ public abstract class Board extends Observable {
 		BoardPosition position = cell.getPosition();
 		if(position.x > 0)
 			possibleCells.add(position.getCellLeft());
-		if(position.x < NUMBER_COLUMNS -1)
+		if(position.x < NUMBER_COLUMNS-1)
 			possibleCells.add(position.getCellRight());
 		if(position.y > 0)
 			possibleCells.add(position.getCellAbove());
-		if(position.y < NUMBER_ROWS -1)
+		if(position.y < NUMBER_ROWS-1)
 			possibleCells.add(position.getCellBelow());
 		return possibleCells;
 	}
