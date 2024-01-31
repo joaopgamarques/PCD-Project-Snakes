@@ -80,6 +80,14 @@ public class Server {
             }
         } catch (IOException e) {
             System.err.println("Could not start server: " + e.getMessage() + ".");
+        } finally {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    System.err.println("Could not close the server: " + e.getMessage() + ".");
+                }
+            }
         }
     }
 
