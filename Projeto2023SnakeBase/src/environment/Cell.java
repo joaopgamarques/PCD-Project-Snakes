@@ -161,12 +161,12 @@ public class Cell implements Serializable {
 			secondLock = currentCell.getLock();
 		}
 
-		// Acquire the first lock.
-		firstLock.lock();
 		try {
-			// Acquire the second lock.
-			secondLock.lock();
+			// Acquire the first lock.
+			firstLock.lock();
 			try {
+				// Acquire the second lock.
+				secondLock.lock();
 				if (!nextCell.isOccupied()) {
 					// Remove the goal from the current cell.
 					Goal goal = currentCell.removeGoal();
@@ -215,12 +215,12 @@ public class Cell implements Serializable {
 			secondLock = currentCell.getLock();
 		}
 
-		// Acquire the first lock.
-		firstLock.lock();
 		try {
-			// Acquire the second lock.
-			secondLock.lock();
+			// Acquire the first lock.
+			firstLock.lock();
 			try {
+				// Acquire the second lock.
+				secondLock.lock();
 				// Check if the next cell is suitable for the move.
 				if (!nextCell.isOccupied()) {
 					// Remove obstacle from the current cell.
