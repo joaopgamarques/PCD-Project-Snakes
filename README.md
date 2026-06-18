@@ -119,4 +119,4 @@ Connects to localhost:12345 by default.
 
 ## Authors
 - Joao Marques
-- Tiago
+- Tiago Lobo
